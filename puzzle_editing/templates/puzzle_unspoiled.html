@@ -1,12 +1,14 @@
 {% extends "base.html" %}
+{% load user_display %}
 {% load user_list %}
 {% load markdown %}
+{% load comment_list %}
 
 {% block title %}{{ puzzle.spoiler_free_title }}{% endblock %}
 
 {% block main %}
 <h1>
-	{{ puzzle.spoiler_free_title }}
+	{{ puzzle.id }}: {{ puzzle.spoiler_free_title }}
 </h1>
 
 <div class="columns">
@@ -51,16 +53,143 @@
 		</table>
 		{% endif %}
 		</div>
+
+		<div class="box">
+			<h2>People</h2>
+			<div class="block">
+				<h5>Author{{ puzzle.authors.count|pluralize }}</h5>
+				<b>Lead:</b> {% user_display puzzle.lead_author linkify=True %}<br/>
+				{% user_list puzzle.authors linkify=True %}
+			</div>
+			<div class="block">
+				<h5>Editor{{ puzzle.editors.count|pluralize }}</h5>
+				{% user_list puzzle.editors %}
+			</div>
+			<div class="block">
+				<h5>Spoiled user{{ puzzle.spoiled.count|pluralize }}</h5>
+				{% user_list puzzle.spoiled %}
+			</div>
+			<div class="block">
+				<h5>Unspoiled user{{ unspoiled|pluralize }}</h5>
+				<p>{{ unspoiled|join:", " }}</p>
+			</div>
+		</div>
 	</div>
 
 	<div class="column">
+    	{% if puzzle.has_postprod %}
 		<div class="box">
 			<h2>External URLs</h2>
-			<h3>👉 <a href="{{ postprod_url }}/{{ puzzle.postprod.slug }}/">{{ puzzle.name }} on staging</a></h3>
+			<h3>👉 <a href="{{ puzzle.postprod_url }}">{{ puzzle.name }} on staging</a></h3>
 		</div>
+    	{% endif %}
+
 		<div class="box">
-			<h2>Summary</h2>
+			<h2>Puzzle Info</h2>
+			<h3>Summary</h3>
 			{{ puzzle.summary|markdown }}
+			{% if user.is_artist %}
+			<h3>Flavor</h3>
+			{{ puzzle.flavor|markdown }}
+			<form method="POST" id="change-flavor">
+				{% csrf_token %}
+				<input class="button is-small is-link" type="submit" name="{% if puzzle.flavor_approved_time %}un{% endif %}approve_flavor" value="{% if puzzle.flavor_approved_time %}Unapprove{% else %}Approve{% endif %}">
+			</form>
+			{% endif %}
+		</div>
+
+		{% if logistics_info %}
+		<div class="box">
+			<h2>
+				Logistics Info
+				<button type="button" class="button is-small is-light toggle-show" data-target="difficulty-form" data-rehide="Hide editing">Edit</button>
+			</h2>
+			<div id="difficulty-form" class="hidden block">
+	        <form method="post">
+	          {% csrf_token %}
+	          Testsolving:
+	          {{ difficulty_form.logistics_difficulty_testsolve }}
+			  Number of Testsolvers:
+	          {{ difficulty_form.logistics_number_testsolvers }}
+			  Expected Testsolve Length:
+	          {{ difficulty_form.logistics_testsolve_length }}
+			  Testsolver Specialized Skills:
+	          {{ difficulty_form.logistics_testsolve_skills }}
+	          Postprod:
+	          {{ difficulty_form.logistics_difficulty_postprod }}
+	          Factcheck:
+	          {{ difficulty_form.logistics_difficulty_factcheck }}
+	          Specialized Puzzle Type:
+	          {{ difficulty_form.logistics_specialized_type }}
+	          <input type="submit" class="button is-info" name="edit_logistics" value="Submit">
+	        </form>
+	      	</div>
+
+			<div>
+				Act: {{ puzzle.act_name | default:"(No act assigned)" }}
+			</div>
+			<div>
+			Testsolving:
+			{% if logistics_info.logistics_difficulty_testsolve %}
+			  <span>{{ logistics_info.logistics_difficulty_testsolve }}</span>
+			{% else %}
+			  <span class="empty">(not rated)</span>
+			{% endif %}
+			</div>
+			<div>
+			Number of Testsolvers:
+			{% if logistics_info.logistics_number_testsolvers %}
+			  <span>{{ logistics_info.logistics_number_testsolvers }}</span>
+			{% else %}
+			  <span class="empty">(not rated)</span>
+			{% endif %}
+			</div>
+			<div>
+			Expected Testsolve Length:
+			{% if logistics_info.logistics_testsolve_length %}
+			  <span>{{ logistics_info.logistics_testsolve_length }}</span>
+			{% else %}
+			  <span class="empty">(not rated)</span>
+			{% endif %}
+			</div>
+			<div>
+			Testsolver Specialized Skills:
+			{% if logistics_info.logistics_testsolve_skills %}
+			  <span>{{ logistics_info.logistics_testsolve_skills }}</span>
+			{% else %}
+			  <span class="empty">(not rated)</span>
+			{% endif %}
+			</div>
+			<div>
+			Postprod:
+			{% if logistics_info.logistics_difficulty_postprod %}
+			  <span>{{ logistics_info.logistics_difficulty_postprod }}</span>
+			{% else %}
+			  <span class="empty">(not rated)</span>
+			{% endif %}
+			</div>
+			<div>
+			Factcheck:
+			{% if logistics_info.logistics_difficulty_factcheck %}
+			  <span>{{ logistics_info.logistics_difficulty_factcheck }}</span>
+			{% else %}
+			  <span class="empty">(not rated)</span>
+			{% endif %}
+			</div>
+			<div>
+			Specialized Puzzle Type:
+			{% if logistics_info.logistics_specialized_type %}
+			  <span>{{ logistics_info.logistics_specialized_type }}</span>
+			{% else %}
+			  <span class="empty">No</span>
+			{% endif %}
+			</div>
+		</div>
+		{% endif %}
+
+		<i>(Since you are unspoiled, only comments made by you will show up below.)</i>
+		<div class="block">
+			{% comment_list request.user puzzle comments comment_form True True %}
 		</div>
 	</div>
 </div>

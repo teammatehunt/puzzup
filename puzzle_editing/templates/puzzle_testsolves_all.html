@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% load user_list %}
 {% load markdown %}
+{% load name_list %}
 {% block title %}{{title}}{% endblock %}
 
 {% block main %}
@@ -20,7 +21,7 @@
 	<div class="message-body">
 		<div class="columns">
 			<div class="column is-three-quarters">
-				{{ session.notes|urlizetrunc:30|markdown }}
+				{{ session.notes|markdown }}
 				<strong>Participants:</strong>
 				{% user_list session.participants %}
 			</div>
@@ -51,7 +52,7 @@
 {% ifchanged part.session.id %}
 <h3>{{ part.session }}</h3>
 {% endifchanged %}
-<h4>{{ part.user.credits_name }}</h4>
+<h4>{{ part.user|display_name }}</h4>
 <div class="columns">
 	<div class="column is-one-fifth">
 		<div class="tags has-addons are-small">

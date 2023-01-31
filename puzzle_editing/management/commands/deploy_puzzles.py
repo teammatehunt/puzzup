@@ -17,15 +17,19 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         if not os.path.exists(settings.HUNT_REPO) and settings.HUNT_REPO:
-            management.call_command('setup_git')
+            management.call_command("setup_git")
 
         repo = git.Repo.init(settings.HUNT_REPO)
         if (
             repo.is_dirty()
             or len(repo.untracked_files) > 0
-            or not repo.head.reference.name in ["master", "main"]
+            or repo.head.reference.name not in ["master", "main"]
         ):
-            raise CommandError("Repository is in a broken state. [{} / {} / {}]".format(repo.is_dirty(), repo.untracked_files, repo.head.reference.name))
+            raise CommandError(
+                "Repository is in a broken state. [{} / {} / {}]".format(
+                    repo.is_dirty(), repo.untracked_files, repo.head.reference.name
+                )
+            )
 
         origin = repo.remotes.origin
         origin.pull()
@@ -36,16 +40,12 @@ class Command(BaseCommand):
         os.makedirs(puzzleFolder)
 
         for pp in PuzzlePostprod.objects.all():
-            answers = pp.puzzle.answers.all()
-            answer = "???"
-            if answers:
-                answer = ", ".join(answers)
             metadata = pp.puzzle.metadata
             puzzlePath = os.path.join(puzzleFolder, pp.slug)
             os.makedirs(puzzlePath)
-            zipFile = pp.zip_file
-            with ZipFile(zipFile) as zf:
-                zf.extractall(puzzlePath)
+            # zipFile = pp.zip_file
+            # with ZipFile(zipFile) as zf:
+            #    zf.extractall(puzzlePath)
             with open(os.path.join(puzzlePath, "metadata.json"), "w") as mf:
                 json.dump(metadata, mf)
             repo.git.add(puzzlePath)

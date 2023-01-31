@@ -179,7 +179,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('slug', models.CharField(help_text="The part of the URL on the hunt site referrring to this puzzle. E.g. for https://puzzle.hunt/puzzle/fifty-fifty, this would be 'fifty-fifty'.", max_length=50, validators=[django.core.validators.RegexValidator(regex='[^<>#%"\\\'|{})(\\[\\]\\/\\\\\\^?=`;@&, ]{1,50}')])),
-                ('zip_file', models.FileField(blank=True, help_text='A zip file as described above. Leave it blank to keep it the same if you already uploaded one and just want to change the metadata.', null=True, upload_to=puzzle_editing.models.get_location_for_upload, validators=[django.core.validators.FileExtensionValidator(['zip'])])),
+                ('zip_file', models.FileField(blank=True, help_text='A zip file as described above. Leave it blank to keep it the same if you already uploaded one and just want to change the metadata.', null=True, upload_to=lambda instance, _: f"puzzle_postprods/puzzle_{instance.puzzle_id}.zip", validators=[django.core.validators.FileExtensionValidator(['zip'])])),
                 ('authors', models.CharField(help_text='The puzzle authors, as displayed on the solution page', max_length=200)),
                 ('complicated_deploy', models.BooleanField(help_text="Check this box if your puzzle involves a serverside component of some sort, and it is not entirely contained in the zip file. If you don't know what this means, you probably don't want to check this box.")),
                 ('mtime', models.DateTimeField(auto_now=True)),

@@ -1,209 +1,197 @@
 import json
+import logging
+import math
 import os
 import re
-import git
 import shutil
 import time
-from zipfile import ZIP_DEFLATED
-from zipfile import ZipFile
+import urllib.error
+import urllib.request
 
+import git
 from django.conf import settings
 from django.core import management
 from django.core.management.base import CommandError
+from PIL import Image
+from PIL import UnidentifiedImageError
 
-from puzzle_editing.models import Puzzle, PuzzlePostprod
 import puzzle_editing.status as status
+from puzzle_editing.git import GitRepo
+from puzzle_editing.models import Puzzle
+from puzzle_editing.models import PuzzlePostprod
+from puzzle_editing.models import Round
+
+logger = logging.getLogger(__name__)
+
+DEFAULT_PUZZLE_TEMPLATE = "client/templates/puzzle.template.tsx"
+DEFAULT_SOLUTION_TEMPLATE = "client/templates/solution.template.tsx"
 
 
-def export_data(export_hints=False, export_metadata=False):
-    if not settings.DEBUG:
-        if not os.path.exists(settings.HUNT_REPO) and settings.HUNT_REPO:
-            management.call_command('setup_git')
+def export_all(act=None):
+    try:
+        repo = GitRepo()
+    except Exception:
+        logger.warning("Failed to instantiate git repo.", exc_info=True)
+        return None
 
-    exported = []
-    if export_metadata:
-        exported.append("metadata")
-    if export_hints:
-        exported.append("hints")
+    branch_name = f"export-{int(time.time())}"
+    repo.checkout_branch(branch_name)
 
-    repo = git.Repo.init(settings.HUNT_REPO)
+    # Export all puzzles by act with an assigned answer.
+    if act:
+        rounds = Round.objects.filter(act__name=act).values_list("id")
+        puzzles = Puzzle.objects.filter(answers__round__in=rounds).distinct()
+    else:
+        puzzles = Puzzle.objects.filter(answers__isnull=False).distinct()
 
-    # origin = repo.remotes.origin
-    # origin.pull()
-    # repo.git.checkout("main")
-
-    branch_name = "{}_{}".format("".join(exported),int(time.time()))
-    repo.git.checkout("-b", branch_name)
-
-    if (
-        repo.is_dirty()
-        or len(repo.untracked_files) > 0
-        or not repo.head.reference.name in [branch_name] # ["master", "main"]
-    ):
-        raise CommandError("Repository is in a broken state. [{} / {} / {}]".format(repo.is_dirty(), repo.untracked_files, repo.head.reference.name))
-
-    puzzleFolder = os.path.join(settings.HUNT_REPO, "hunt/data/puzzle")
-
-    puzzles = Puzzle.objects.filter(status__in=[
-        status.NEEDS_POSTPROD,
-        status.ACTIVELY_POSTPRODDING,
-        status.POSTPROD_BLOCKED,
-        status.POSTPROD_BLOCKED_ON_TECH,
-        status.AWAITING_POSTPROD_APPROVAL,
-        status.NEEDS_FACTCHECK,
-        status.NEEDS_FINAL_REVISIONS,
-        status.NEEDS_COPY_EDITS,
-        status.NEEDS_HINTS,
-        status.AWAITING_HINTS_APPROVAL,
-        status.DONE,
-    ])
-
+    fixture_path = repo.fixture_path()
     for puzzle in puzzles:
-        if not (puzzle.has_postprod()):
-            print("Creating postprod obj for {}.".format(puzzle.name))
-            default_slug = re.sub(
-                r'[<>#%\'"|{}\[\])(\\\^?=`;@&,]',
-                "",
-                re.sub(r"[ \/]+", "-", puzzle.name),
-            ).lower()[:50] # slug field has maxlength of 50
-            pp = PuzzlePostprod(
-                puzzle = puzzle,
-                slug = default_slug,
-                authors = puzzle.author_byline,
-                complicated_deploy = False,
-            )
+        if puzzle.has_postprod():
+            pp = puzzle.postprod
+        else:
+            logger.info("Creating postprod obj for %s", puzzle.name)
+            pp = PuzzlePostprod(puzzle=puzzle, slug=puzzle.slug)
             pp.save()
 
-        slug = puzzle.postprod.slug
+        with open(os.path.join(fixture_path, f"{pp.slug}.yaml"), "w") as f:
+            f.write(puzzle.get_yaml_fixture())
 
-        if not os.path.exists(puzzleFolder):
-            os.makedirs(puzzleFolder)
+    if repo.commit("Export puzzle fixtures"):
+        repo.push()
+        return branch_name
 
-        puzzlePath = os.path.join(puzzleFolder, slug)
+    return None
 
-        if not os.path.exists(puzzlePath):
-            os.makedirs(puzzlePath)
 
-        if export_metadata:
-            metadatafile_path = os.path.join(puzzlePath, 'metadata.json')
-            outdata = []
-            try:
-                outdata = puzzle.metadata
-            except Exception as e:
-                print(metadatafile_path, e)
-                # sys.exit(1)
-
-            if outdata and outdata['answer'] != "???":
-                with open(metadatafile_path, 'w+') as metadatafile:
-                    json.dump(outdata, metadatafile)
-
-        if export_hints:
-            hintfile_path = os.path.join(puzzlePath, 'hints.json')
-            hintdata = []
-            try:
-                for hint in puzzle.hints.all():
-                    hintdata.append([
-                        hint.order,
-                        hint.keywords.split(','),
-                        hint.content,
-                    ])
-            except Exception as e:
-                print(hintfile_path, e)
-                # sys.exit(1)
-
-            if hintdata:
-                with open(hintfile_path, 'w+') as hintfile:
-                    json.dump(hintdata, hintfile)
-
-    if repo.is_dirty() or len(repo.untracked_files) > 0:
-        repo.git.add(update=True)
-        repo.git.add(A=True)
-        repo.git.commit("-m", "Exported all {}".format(", ".join(exported)))
-        if not settings.DEBUG:
-            repo.git.push('--set-upstream', repo.remote().name, branch_name)
-
-def get_latest_zip(pp):
-    if not os.path.exists(settings.HUNT_REPO) and settings.HUNT_REPO:
-        management.call_command('setup_git')
+def export_puzzle(
+    pp, puzzle_directory, puzzle_html="", solution_html="", max_image_width=None
+):
+    """Writes and commits puzzle template, solution, and yaml fixtures into the hunt repo."""
     try:
-        repo = git.Repo.init(settings.HUNT_REPO)
-    except BaseException:
-        pp.slug = "THIS_URL_IS_FAKE_SINCE_YOU_UPLOADED_THIS_PUZZLE_ON_LOCAL"
+        repo = GitRepo()
+    except Exception:
+        logger.warning("Failed to instantiate git repo.", exc_info=True)
         return
 
-    if (
-        repo.is_dirty()
-        or len(repo.untracked_files) > 0
-        or not repo.head.reference.name in ["master", "main"]
-    ):
-        raise Exception("Repository is in a broken state.")
+    branch_name = pp.slug
+    repo.checkout_branch(branch_name)
 
-    origin = repo.remotes.origin
-    origin.pull()
+    puzzle_path = os.path.join(repo.puzzle_path(pp.slug, puzzle_directory), "index.tsx")
+    if not os.path.exists(puzzle_path) or puzzle_html:
+        assets_path = repo.assets_puzzle_path(pp.slug)
+        puzzle_html, images = download_images(puzzle_html, assets_path, max_image_width)
+        with open(puzzle_path, "w") as f:
+            f.write(
+                get_puzzle_html(
+                    pp.puzzle.round.puzzle_template or DEFAULT_PUZZLE_TEMPLATE,
+                    puzzle_html,
+                    pp.slug,
+                    images=images,
+                )
+            )
 
-    puzzleFolder = os.path.join(settings.HUNT_REPO, "hunt/data/puzzle")
-    puzzlePath = os.path.join(puzzleFolder, pp.slug)
-    zipPath = f"/tmp/puzzle{pp.puzzle.id}.zip"
+    solution_path = os.path.join(repo.solution_path(pp.slug), "index.tsx")
+    if not os.path.exists(solution_path) or solution_html:
+        assets_path = repo.assets_solution_path(pp.slug)
+        solution_html, images = download_images(
+            solution_html, assets_path, max_image_width
+        )
+        with open(solution_path, "w") as f:
+            f.write(
+                get_puzzle_html(
+                    pp.puzzle.round.solution_template or DEFAULT_SOLUTION_TEMPLATE,
+                    solution_html,
+                    pp.slug,
+                    images=images,
+                    title=pp.puzzle.name,
+                    answer=pp.puzzle.answer,
+                    authors=pp.puzzle.author_byline,
+                )
+            )
 
-    if os.path.exists(zipPath):
-        os.remove(zipPath)
+    fixture_path = repo.fixture_path()
+    with open(os.path.join(fixture_path, f"{pp.slug}.yaml"), "w") as f:
+        f.write(pp.puzzle.get_yaml_fixture())
 
-    with ZipFile(zipPath, "w", ZIP_DEFLATED) as zipHandle:
-        for root, _, files in os.walk(puzzlePath):
-            for file in files:
-                if file != "metadata.json":
-                    zipHandle.write(
-                        os.path.join(root, file),
-                        os.path.relpath(os.path.join(root, file), puzzlePath),
-                    )
+    if repo.commit(f"Postprodding '{pp.slug}'"):
+        repo.push()
+        return branch_name
 
-    return zipPath
+    return ""
 
-def deploy_puzzle(pp, deploy_zip=True):
-    if settings.DEBUG:
-        return
 
-    if not os.path.exists(settings.HUNT_REPO) and settings.HUNT_REPO:
-        management.call_command('setup_git')
+def download_images(html: str, assets_path: str, max_image_width: int):
+    # Search for all images in HTML
+    images = re.findall(r'src="([^"]+)"', html)
+    new_images = []
+    image_map = {}
+
+    for i, src in enumerate(images):
+        full_assets_path = os.path.join(assets_path, f"{i}.png")
+        relative_path = full_assets_path.split(settings.HUNT_REPO_CLIENT + "/")[-1]
+
+        # Download the image and save it to the hunt repo
+        try:
+            urllib.request.urlretrieve(src, full_assets_path)
+            # Resize the image, while preserving aspect ratio.
+            image = Image.open(full_assets_path)
+            if image.width > max_image_width:
+                aspect_ratio = image.width / float(image.height)
+                image = image.resize(
+                    (max_image_width, int(max_image_width / aspect_ratio)),
+                    resample=Image.BICUBIC,
+                )
+                image.save(full_assets_path, format="PNG", optimize=True)
+
+            new_images.append((relative_path, f"image{i}"))
+        except (urllib.error.URLError, UnidentifiedImageError):
+            logger.exception("Failed to download asset from %s", src)
+            new_images.append(
+                ("FAILED/TO/DOWNLOAD/PLS/IMPORT/MANUALLY.png", f"image{i}")
+            )
+
+        # Save the relative path to the image_map
+        image_map[src] = f"image{i}"
+
+    def replace_img_src(matchobj):
+        return f"src={{{image_map[matchobj.group(1)]}}}"
+
+    # Replace images with new variable names
+    if images:
+        html = re.sub(r'src="([^"]+)"', replace_img_src, html)
+
+    return html, new_images
+
+
+def get_puzzle_html(template, html, slug, images=None, title="", answer="", authors=""):
+    template_file = os.path.join(settings.HUNT_REPO, template)
+
     try:
-        repo = git.Repo.init(settings.HUNT_REPO)
-    except BaseException:
-        pp.slug = "THIS_URL_IS_FAKE_SINCE_YOU_UPLOADED_THIS_PUZZLE_ON_LOCAL"
-        return
+        with open(template_file, "r") as f:
+            puzzle_tsx = f.read()
 
-    if (
-        repo.is_dirty()
-        or len(repo.untracked_files) > 0
-        or not repo.head.reference.name in ["master", "main"]
-    ):
-        print(repo.untracked_files)
-        raise Exception("Repository is in a broken state. [{} / {} / {}]".format(repo.is_dirty(), len(repo.untracked_files), repo.head.reference.name))
+            # Add imports to top of file
+            imports = [f"import {var} from '{path}';" for (path, var) in (images or [])]
+            puzzle_tsx = puzzle_tsx.replace(
+                "/*[[INSERT IMPORTS]]*/", "\n".join(imports) or ""
+            )
 
-    origin = repo.remotes.origin
-    origin.pull()
+            if html:
+                puzzle_tsx = puzzle_tsx.replace("[[INSERT CONTENT]]", html)
+            if slug:
+                puzzle_tsx = puzzle_tsx.replace("[[INSERT SLUG]]", slug)
+            if title:
+                puzzle_tsx = puzzle_tsx.replace("[[INSERT TITLE]]", title)
+            if answer:
+                puzzle_tsx = puzzle_tsx.replace("[[INSERT ANSWER]]", answer)
+            if authors:
+                puzzle_tsx = puzzle_tsx.replace("[[INSERT AUTHORS]]", authors)
 
-    puzzleFolder = os.path.join(settings.HUNT_REPO, "hunt/data/puzzle")
-    answers = pp.puzzle.answers.all()
-    answer = "???"
-    if answers:
-        answer = ", ".join(a.answer for a in answers)
-    metadata = pp.puzzle.metadata
-    puzzlePath = os.path.join(puzzleFolder, pp.slug)
-    if deploy_zip:
-        if os.path.exists(puzzlePath):
-            shutil.rmtree(puzzlePath)
-        os.makedirs(puzzlePath)
-        zipFile = pp.zip_file
-        with ZipFile(zipFile) as zf:
-            zf.extractall(puzzlePath)
+            # Fix some HTML -> React
+            puzzle_tsx = re.sub(
+                r'(col|row)Span="(\d+)"', r"\g<1>Span={\g<2>}", puzzle_tsx
+            )
 
-    with open(os.path.join(puzzlePath, "metadata.json"), "w") as mf:
-        json.dump(metadata, mf)
-
-    repo.git.add(puzzlePath)
-
-    if repo.is_dirty() or len(repo.untracked_files) > 0:
-        repo.git.add(update=True)
-        repo.git.add(A=True)
-        repo.git.commit("-m", "Postprodding '%s'." % (pp.slug))
-        origin.push()
+            return puzzle_tsx
+    except Exception:
+        raise CommandError(f"Failed to open {template_file}")

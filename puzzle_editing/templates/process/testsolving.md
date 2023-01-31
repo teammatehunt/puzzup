@@ -6,10 +6,10 @@
 
 3. Copy the URL of this page.
 
-3. In the Discord channel #testsolving-announcements, post a the link, along the date and time. (Or poll for times.) Folks will sign up. We recommend having at least two solvers in your test and preferably more -- we can't duplicate Mystery Hunt conditions, but we can try our best.
+4. In the Discord channel #testsolving-announcements, post a the link, along the date and time. (Or poll for times.) Folks will sign up. We recommend having at least two solvers in your test and preferably more -- we can't duplicate Mystery Hunt conditions, but we can try our best.
 
-6.  If your puzzle can't be tested in Google Drive, contact the Testsolve Coordinators (email tc@puzzup.lol) and they'll help you figure something out.
+5.  If your puzzle can't be tested in Google Drive, contact the Testsolve Coordinators and they'll help you figure something out.
 
-7. Add the testsolve to [our team calendar](https://calendar.google.com/calendar/u/0?cid=MDI5ODYyam90MmNkb2o5NTdkcWFmMjc1NG9AZ3JvdXAuY2FsZW5kYXIuZ29vZ2xlLmNvbQ). You can also do this via Niles bot in Discord. Go to the #calendar channel to learn how.
+6. Add the testsolve to our team calendar. You can also do this via Niles bot in Discord. Go to the #calendar channel to learn how.
 
 7. Meet your solvers in the spreadsheet at the appointed time and send them off to solve!

@@ -27,7 +27,7 @@
 
 .select.is-loading::after, select.is-loading::after {
   animation: spinAround 500ms infinite linear;
-  border: 2px solid #dbdbdb;
+  border: 2px solid hsl(0deg, 0%, 86%);
   border-radius: 290486px;
   border-right-color: transparent;
   border-top-color: transparent;
@@ -65,10 +65,10 @@ input[disabled][type=text], input[disabled][type=password], input[disabled][type
 }
 
 input[type=text], input[type=password], input[type=email], textarea, .select select, select select, .textarea, .input {
-  background-color: white;
-  border-color: #dbdbdb;
+  background-color: hsl(0deg, 0%, 100%);
+  border-color: hsl(0deg, 0%, 86%);
   border-radius: 4px;
-  color: #363636;
+  color: hsl(0deg, 0%, 21%);
 }
 input[type=text]::-moz-placeholder, input[type=password]::-moz-placeholder, input[type=email]::-moz-placeholder, textarea::-moz-placeholder, .select select::-moz-placeholder, select select::-moz-placeholder, .textarea::-moz-placeholder, .input::-moz-placeholder {
   color: rgba(54, 54, 54, 0.3);
@@ -83,17 +83,17 @@ input[type=text]:-ms-input-placeholder, input[type=password]:-ms-input-placehold
   color: rgba(54, 54, 54, 0.3);
 }
 input[type=text]:hover, input[type=password]:hover, input[type=email]:hover, textarea:hover, .select select:hover, select select:hover, .textarea:hover, .input:hover, input.is-hovered[type=text], input.is-hovered[type=password], input.is-hovered[type=email], textarea.is-hovered, .select select.is-hovered, select select.is-hovered, .is-hovered.textarea, .is-hovered.input {
-  border-color: #b5b5b5;
+  border-color: hsl(0deg, 0%, 71%);
 }
 input[type=text]:focus, input[type=password]:focus, input[type=email]:focus, textarea:focus, .select select:focus, select select:focus, .textarea:focus, .input:focus, input.is-focused[type=text], input.is-focused[type=password], input.is-focused[type=email], textarea.is-focused, .select select.is-focused, select select.is-focused, .is-focused.textarea, .is-focused.input, input[type=text]:active, input[type=password]:active, input[type=email]:active, textarea:active, .select select:active, select select:active, .textarea:active, .input:active, input.is-active[type=text], input.is-active[type=password], input.is-active[type=email], textarea.is-active, .select select.is-active, select select.is-active, .is-active.textarea, .is-active.input {
-  border-color: #3273dc;
+  border-color: hsl(217deg, 71%, 53%);
   box-shadow: 0 0 0 0.125em rgba(50, 115, 220, 0.25);
 }
 input[disabled][type=text], input[disabled][type=password], input[disabled][type=email], textarea[disabled], .select select[disabled], select select[disabled], [disabled].textarea, [disabled].input, fieldset[disabled] input[type=text], fieldset[disabled] input[type=password], fieldset[disabled] input[type=email], fieldset[disabled] textarea, fieldset[disabled] .select select, fieldset[disabled] select select, .select fieldset[disabled] select, select fieldset[disabled] select, fieldset[disabled] .textarea, fieldset[disabled] .input {
-  background-color: whitesmoke;
-  border-color: whitesmoke;
+  background-color: hsl(0deg, 0%, 96%);
+  border-color: hsl(0deg, 0%, 96%);
   box-shadow: none;
-  color: #7a7a7a;
+  color: hsl(0deg, 0%, 48%);
 }
 input[disabled][type=text]::-moz-placeholder, input[disabled][type=password]::-moz-placeholder, input[disabled][type=email]::-moz-placeholder, textarea[disabled]::-moz-placeholder, .select select[disabled]::-moz-placeholder, select select[disabled]::-moz-placeholder, [disabled].textarea::-moz-placeholder, [disabled].input::-moz-placeholder, fieldset[disabled] input[type=text]::-moz-placeholder, fieldset[disabled] input[type=password]::-moz-placeholder, fieldset[disabled] input[type=email]::-moz-placeholder, fieldset[disabled] textarea::-moz-placeholder, fieldset[disabled] .select select::-moz-placeholder, fieldset[disabled] select select::-moz-placeholder, .select fieldset[disabled] select::-moz-placeholder, select fieldset[disabled] select::-moz-placeholder, fieldset[disabled] .textarea::-moz-placeholder, fieldset[disabled] .input::-moz-placeholder {
   color: rgba(122, 122, 122, 0.3);
@@ -117,61 +117,61 @@ input[disabled][type=text]:-ms-input-placeholder, input[disabled][type=password]
   box-shadow: none;
 }
 .is-white.textarea, .is-white.input {
-  border-color: white;
+  border-color: hsl(0deg, 0%, 100%);
 }
 .is-white.textarea:focus, .is-white.input:focus, .is-white.is-focused.textarea, .is-white.is-focused.input, .is-white.textarea:active, .is-white.input:active, .is-white.is-active.textarea, .is-white.is-active.input {
   box-shadow: 0 0 0 0.125em rgba(255, 255, 255, 0.25);
 }
 .is-black.textarea, .is-black.input {
-  border-color: #0a0a0a;
+  border-color: hsl(0deg, 0%, 4%);
 }
 .is-black.textarea:focus, .is-black.input:focus, .is-black.is-focused.textarea, .is-black.is-focused.input, .is-black.textarea:active, .is-black.input:active, .is-black.is-active.textarea, .is-black.is-active.input {
   box-shadow: 0 0 0 0.125em rgba(10, 10, 10, 0.25);
 }
 .is-light.textarea, .is-light.input {
-  border-color: whitesmoke;
+  border-color: hsl(0deg, 0%, 96%);
 }
 .is-light.textarea:focus, .is-light.input:focus, .is-light.is-focused.textarea, .is-light.is-focused.input, .is-light.textarea:active, .is-light.input:active, .is-light.is-active.textarea, .is-light.is-active.input {
   box-shadow: 0 0 0 0.125em rgba(245, 245, 245, 0.25);
 }
 .is-dark.textarea, .is-dark.input {
-  border-color: #363636;
+  border-color: hsl(0deg, 0%, 21%);
 }
 .is-dark.textarea:focus, .is-dark.input:focus, .is-dark.is-focused.textarea, .is-dark.is-focused.input, .is-dark.textarea:active, .is-dark.input:active, .is-dark.is-active.textarea, .is-dark.is-active.input {
   box-shadow: 0 0 0 0.125em rgba(54, 54, 54, 0.25);
 }
 .is-primary.textarea, .is-primary.input {
-  border-color: #00d1b2;
+  border-color: hsl(171deg, 100%, 41%);
 }
 .is-primary.textarea:focus, .is-primary.input:focus, .is-primary.is-focused.textarea, .is-primary.is-focused.input, .is-primary.textarea:active, .is-primary.input:active, .is-primary.is-active.textarea, .is-primary.is-active.input {
   box-shadow: 0 0 0 0.125em rgba(0, 209, 178, 0.25);
 }
 .is-link.textarea, .is-link.input {
-  border-color: #3273dc;
+  border-color: hsl(217deg, 71%, 53%);
 }
 .is-link.textarea:focus, .is-link.input:focus, .is-link.is-focused.textarea, .is-link.is-focused.input, .is-link.textarea:active, .is-link.input:active, .is-link.is-active.textarea, .is-link.is-active.input {
   box-shadow: 0 0 0 0.125em rgba(50, 115, 220, 0.25);
 }
 .is-info.textarea, .is-info.input {
-  border-color: #3298dc;
+  border-color: hsl(204deg, 71%, 53%);
 }
 .is-info.textarea:focus, .is-info.input:focus, .is-info.is-focused.textarea, .is-info.is-focused.input, .is-info.textarea:active, .is-info.input:active, .is-info.is-active.textarea, .is-info.is-active.input {
   box-shadow: 0 0 0 0.125em rgba(50, 152, 220, 0.25);
 }
 .is-success.textarea, .is-success.input {
-  border-color: #48c774;
+  border-color: hsl(141deg, 53%, 53%);
 }
 .is-success.textarea:focus, .is-success.input:focus, .is-success.is-focused.textarea, .is-success.is-focused.input, .is-success.textarea:active, .is-success.input:active, .is-success.is-active.textarea, .is-success.is-active.input {
   box-shadow: 0 0 0 0.125em rgba(72, 199, 116, 0.25);
 }
 .is-warning.textarea, .is-warning.input {
-  border-color: #ffdd57;
+  border-color: hsl(48deg, 100%, 67%);
 }
 .is-warning.textarea:focus, .is-warning.input:focus, .is-warning.is-focused.textarea, .is-warning.is-focused.input, .is-warning.textarea:active, .is-warning.input:active, .is-warning.is-active.textarea, .is-warning.is-active.input {
   box-shadow: 0 0 0 0.125em rgba(255, 221, 87, 0.25);
 }
 .is-danger.textarea, .is-danger.input {
-  border-color: #f14668;
+  border-color: hsl(348deg, 86%, 61%);
 }
 .is-danger.textarea:focus, .is-danger.input:focus, .is-danger.is-focused.textarea, .is-danger.is-focused.input, .is-danger.textarea:active, .is-danger.input:active, .is-danger.is-active.textarea, .is-danger.is-active.input {
   box-shadow: 0 0 0 0.125em rgba(241, 70, 104, 0.25);
@@ -236,7 +236,7 @@ input[disabled][type=text]:-ms-input-placeholder, input[disabled][type=password]
   height: 2.5em;
 }
 .select:not(.is-multiple):not(.is-loading)::after, select:not(.is-multiple):not(.is-loading)::after {
-  border-color: #3273dc;
+  border-color: hsl(217deg, 71%, 53%);
   right: 1.125em;
   z-index: 4;
 }
@@ -255,7 +255,7 @@ input[disabled][type=text]:-ms-input-placeholder, input[disabled][type=password]
   display: none;
 }
 .select select[disabled]:hover, select select[disabled]:hover, fieldset[disabled] .select select:hover, fieldset[disabled] select select:hover {
-  border-color: whitesmoke;
+  border-color: hsl(0deg, 0%, 96%);
 }
 .select select:not([multiple]), select select:not([multiple]) {
   padding-right: 2.5em;
@@ -268,13 +268,13 @@ input[disabled][type=text]:-ms-input-placeholder, input[disabled][type=password]
   padding: 0.5em 1em;
 }
 .select:not(.is-multiple):not(.is-loading):hover::after, select:not(.is-multiple):not(.is-loading):hover::after {
-  border-color: #363636;
+  border-color: hsl(0deg, 0%, 21%);
 }
 .select.is-white:not(:hover)::after, select.is-white:not(:hover)::after {
-  border-color: white;
+  border-color: hsl(0deg, 0%, 100%);
 }
 .select.is-white select, select.is-white select {
-  border-color: white;
+  border-color: hsl(0deg, 0%, 100%);
 }
 .select.is-white select:hover, select.is-white select:hover, .select.is-white select.is-hovered, select.is-white select.is-hovered {
   border-color: #f2f2f2;
@@ -283,10 +283,10 @@ input[disabled][type=text]:-ms-input-placeholder, input[disabled][type=password]
   box-shadow: 0 0 0 0.125em rgba(255, 255, 255, 0.25);
 }
 .select.is-black:not(:hover)::after, select.is-black:not(:hover)::after {
-  border-color: #0a0a0a;
+  border-color: hsl(0deg, 0%, 4%);
 }
 .select.is-black select, select.is-black select {
-  border-color: #0a0a0a;
+  border-color: hsl(0deg, 0%, 4%);
 }
 .select.is-black select:hover, select.is-black select:hover, .select.is-black select.is-hovered, select.is-black select.is-hovered {
   border-color: black;
@@ -295,10 +295,10 @@ input[disabled][type=text]:-ms-input-placeholder, input[disabled][type=password]
   box-shadow: 0 0 0 0.125em rgba(10, 10, 10, 0.25);
 }
 .select.is-light:not(:hover)::after, select.is-light:not(:hover)::after {
-  border-color: whitesmoke;
+  border-color: hsl(0deg, 0%, 96%);
 }
 .select.is-light select, select.is-light select {
-  border-color: whitesmoke;
+  border-color: hsl(0deg, 0%, 96%);
 }
 .select.is-light select:hover, select.is-light select:hover, .select.is-light select.is-hovered, select.is-light select.is-hovered {
   border-color: #e8e8e8;
@@ -307,10 +307,10 @@ input[disabled][type=text]:-ms-input-placeholder, input[disabled][type=password]
   box-shadow: 0 0 0 0.125em rgba(245, 245, 245, 0.25);
 }
 .select.is-dark:not(:hover)::after, select.is-dark:not(:hover)::after {
-  border-color: #363636;
+  border-color: hsl(0deg, 0%, 21%);
 }
 .select.is-dark select, select.is-dark select {
-  border-color: #363636;
+  border-color: hsl(0deg, 0%, 21%);
 }
 .select.is-dark select:hover, select.is-dark select:hover, .select.is-dark select.is-hovered, select.is-dark select.is-hovered {
   border-color: #292929;
@@ -319,10 +319,10 @@ input[disabled][type=text]:-ms-input-placeholder, input[disabled][type=password]
   box-shadow: 0 0 0 0.125em rgba(54, 54, 54, 0.25);
 }
 .select.is-primary:not(:hover)::after, select.is-primary:not(:hover)::after {
-  border-color: #00d1b2;
+  border-color: hsl(171deg, 100%, 41%);
 }
 .select.is-primary select, select.is-primary select {
-  border-color: #00d1b2;
+  border-color: hsl(171deg, 100%, 41%);
 }
 .select.is-primary select:hover, select.is-primary select:hover, .select.is-primary select.is-hovered, select.is-primary select.is-hovered {
   border-color: #00b89c;
@@ -331,10 +331,10 @@ input[disabled][type=text]:-ms-input-placeholder, input[disabled][type=password]
   box-shadow: 0 0 0 0.125em rgba(0, 209, 178, 0.25);
 }
 .select.is-link:not(:hover)::after, select.is-link:not(:hover)::after {
-  border-color: #3273dc;
+  border-color: hsl(217deg, 71%, 53%);
 }
 .select.is-link select, select.is-link select {
-  border-color: #3273dc;
+  border-color: hsl(217deg, 71%, 53%);
 }
 .select.is-link select:hover, select.is-link select:hover, .select.is-link select.is-hovered, select.is-link select.is-hovered {
   border-color: #2366d1;
@@ -343,10 +343,10 @@ input[disabled][type=text]:-ms-input-placeholder, input[disabled][type=password]
   box-shadow: 0 0 0 0.125em rgba(50, 115, 220, 0.25);
 }
 .select.is-info:not(:hover)::after, select.is-info:not(:hover)::after {
-  border-color: #3298dc;
+  border-color: hsl(204deg, 71%, 53%);
 }
 .select.is-info select, select.is-info select {
-  border-color: #3298dc;
+  border-color: hsl(204deg, 71%, 53%);
 }
 .select.is-info select:hover, select.is-info select:hover, .select.is-info select.is-hovered, select.is-info select.is-hovered {
   border-color: #238cd1;
@@ -355,10 +355,10 @@ input[disabled][type=text]:-ms-input-placeholder, input[disabled][type=password]
   box-shadow: 0 0 0 0.125em rgba(50, 152, 220, 0.25);
 }
 .select.is-success:not(:hover)::after, select.is-success:not(:hover)::after {
-  border-color: #48c774;
+  border-color: hsl(141deg, 53%, 53%);
 }
 .select.is-success select, select.is-success select {
-  border-color: #48c774;
+  border-color: hsl(141deg, 53%, 53%);
 }
 .select.is-success select:hover, select.is-success select:hover, .select.is-success select.is-hovered, select.is-success select.is-hovered {
   border-color: #3abb67;
@@ -367,10 +367,10 @@ input[disabled][type=text]:-ms-input-placeholder, input[disabled][type=password]
   box-shadow: 0 0 0 0.125em rgba(72, 199, 116, 0.25);
 }
 .select.is-warning:not(:hover)::after, select.is-warning:not(:hover)::after {
-  border-color: #ffdd57;
+  border-color: hsl(48deg, 100%, 67%);
 }
 .select.is-warning select, select.is-warning select {
-  border-color: #ffdd57;
+  border-color: hsl(48deg, 100%, 67%);
 }
 .select.is-warning select:hover, select.is-warning select:hover, .select.is-warning select.is-hovered, select.is-warning select.is-hovered {
   border-color: #ffd83d;
@@ -379,10 +379,10 @@ input[disabled][type=text]:-ms-input-placeholder, input[disabled][type=password]
   box-shadow: 0 0 0 0.125em rgba(255, 221, 87, 0.25);
 }
 .select.is-danger:not(:hover)::after, select.is-danger:not(:hover)::after {
-  border-color: #f14668;
+  border-color: hsl(348deg, 86%, 61%);
 }
 .select.is-danger select, select.is-danger select {
-  border-color: #f14668;
+  border-color: hsl(348deg, 86%, 61%);
 }
 .select.is-danger select:hover, select.is-danger select:hover, .select.is-danger select.is-hovered, select.is-danger select.is-hovered {
   border-color: #ef2e55;
@@ -401,7 +401,7 @@ input[disabled][type=text]:-ms-input-placeholder, input[disabled][type=password]
   font-size: 1.5rem;
 }
 .select.is-disabled::after, select.is-disabled::after {
-  border-color: #7a7a7a;
+  border-color: hsl(0deg, 0%, 48%);
 }
 .select.is-fullwidth, select.is-fullwidth {
   width: 100%;
@@ -475,29 +475,29 @@ nav {
   border-bottom-width: 1px;
 }
 
-body.awaiting-editor table th, body.byround table th {
+body.awaiting-editor table th, body.byround table th, body.rounds table th {
   background-color: var(--secondary-bg);
 }
 
-body.assign-answers .answer, body.answers .answer, body.byround table .answer {
+.answer {
   font-family: monospace;
   font-weight: bold;
   font-size: 0.9rem;
 }
-body.assign-answers .answer a, body.answers .answer a, body.byround table .answer a {
+.answer a {
   color: black;
 }
 
-body.byround table {
+body.byround table, body.rounds table {
   font-size: 0.95rem !important;
 }
-body.byround table .authors, body.byround table .editors {
+body.byround table .authors, body.byround table .editors, body.rounds table .authors, body.rounds table .editors {
   font-size: 0.9em;
 }
-body.byround table .mechanics, body.byround table .notes {
+body.byround table .mechanics, body.byround table .notes, body.rounds table .mechanics, body.rounds table .notes {
   font-size: 0.8em;
 }
-body.byround .meta {
+body.byround .meta, body.rounds .meta {
   background: rgba(0, 128, 0, 0.05);
 }
 
@@ -731,6 +731,13 @@ table.puzzle-table td p, table.puzzle-table td pre {
   content: "✅";
 }
 
+.guess.partially_correct {
+  font-weight: bold;
+}
+.guess.partially_correct::before {
+  content: "❓";
+}
+
 .guess.incorrect::before {
   content: "❌";
 }
@@ -756,11 +763,23 @@ table.puzzle-table td p, table.puzzle-table td pre {
   display: none;
 }
 
+.hide-fact-assigned:checked ~ div table tr.factchecker {
+  display: none;
+}
+
 .hide-past-solution:checked ~ div table tr.past_needs_solution {
   display: none;
 }
 
 .show-only-answer:checked ~ div table tr.puzzle-row:not(.answered) {
+  display: none;
+}
+
+.show-answer:not(:checked) ~ div table td.answer {
+  display: none;
+}
+
+.show-answer:checked ~ div table td.answer-hidden {
   display: none;
 }
 
@@ -783,19 +802,19 @@ table.puzzle-table td p, table.puzzle-table td pre {
   display: none;
 }
 
-.hide-assignments:checked ~ div > table .assignment-spoiler {
+.hide-assignments:checked ~ div table .assignment-spoiler {
   display: none;
 }
 
-.hide-assignments:not(:checked) ~ div > table .assignment-unspoiler {
+.hide-assignments:not(:checked) ~ div table .assignment-unspoiler {
   display: none;
 }
 
-.hide-delete-answer:checked ~ div > table .delete-answer-button {
+.hide-delete-answer:checked ~ div table .delete-answer-button {
   display: none;
 }
 
-.hide-assignments:not(:checked) ~ div > table .assignment-unspoiler {
+.hide-assignments:not(:checked) ~ div table .assignment-unspoiler {
   display: none;
 }
 
@@ -816,7 +835,7 @@ table.puzzle-table td p, table.puzzle-table td pre {
   color: var(--deemphasized-color);
 }
 
-.hide-assigned-to-other:checked + label + br + br + div table tr.assigned-to-other {
+.hide-assigned-to-other:checked ~ div table tr.assigned-to-other {
   display: none;
 }
 
@@ -914,12 +933,12 @@ body.singleround h2 .round-link {
 }
 .testsolving-session textarea {
   width: 100%;
-  height: 4rem;
+  height: 8rem;
 }
-.testsolving-session .control ul {
+.testsolving-session .control:not(.markdown-preview) > ul {
   margin: 0;
 }
-.testsolving-session .control li {
+.testsolving-session .control:not(.markdown-preview) > ul li {
   list-style-type: none;
 }
 
@@ -948,3 +967,5 @@ body.singleround h2 .round-link {
 .support-sidebar h5 {
   margin-bottom: 0.3em;
 }
+
+/*# sourceMappingURL=screen.css.map */

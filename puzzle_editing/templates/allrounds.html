@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load answer %}
 {% load markdown %}
 
 {% block title %}Rounds{% endblock %}
@@ -26,6 +27,10 @@
 	<a href="{% url "rounds" %}">Back to all rounds</a>
 </div>
 {% endif %}
+
+<input id="show-answer-{{ random_id }}" type="checkbox" class="show-answer" {% if eic_view %}checked{% endif %}>
+<label for="show-answer-{{ random_id }}">Show answers</label>
+<p></p> {# add empty p for padding #}
 
 {% for round in rounds %}
 <div class="columns round-row {% if eic_view %}eic{{ round.editor.id }}{% endif %}">
@@ -57,6 +62,7 @@
 					<th width="20%">Mechanics</th>
 					{% endif %}
 					<th width="20%">Status</th>
+					<th width="20%">Deep</th>
 				</tr>
 				{% for answer in round.answers %}
 					{% for puzzle in answer.puzzles %}
@@ -66,34 +72,47 @@
 							</td>
 							{% if forloop.first %}
 							<td class="answer" rowspan="{{ answer.puzzles|length }}">
-								{{ puzzle.is_meta|yesno:"Ⓜ️ ," }}<a href="{% url 'edit_answer' answer.id %}">{{ answer.answer }}</a>
+								{{ puzzle.is_meta|yesno:"Ⓜ️ ," }}<a href="{% url 'edit_answer' answer.id %}">{% formatted_answer answer %}</a>{% if answer.flexible %} (Flex){% endif %}
 							</td>
+							<td class="answer-hidden empty">(hidden)</td>
 							{% endif %}
 							<td class="authors">
-								{% for author in puzzle.authors.all %}{{ author.display_name }}{{ forloop.last|yesno:",&#44; "|safe }}{% endfor %}
+								{% for author in puzzle.authors.all %}{{ author }}{{ forloop.last|yesno:",&#44; "|safe }}{% endfor %}
 							</td>
 							<td>
-								👉 <a href="{{ puzzle.postprod_url }}">Staging</a>
+								{% if puzzle.postprod_url %}
+									👉 <a href="{{ puzzle.postprod_url }}">Staging</a>
+								{% else %}
+									<span class="empty">--</span>
+								{% endif %}
 							</td>
 							{% if eic_view %}
 							<td class="mechanics">
-								{% if puzzle.editor_notes %}{{ puzzle.editor_notes|urlizetrunc:20|markdown }}{% endif %}
+								{% if puzzle.editor_notes %}{{ puzzle.editor_notes|markdown }}{% endif %}
 							</td>
 							{% endif %}
 							<td>
 								<span class="tag is-small">{{ puzzle.get_status_emoji }} {{ puzzle.get_status_display }}</span>
 							</td>
+							<td>
+								<span class="is-small">{{ puzzle.deep }}</span>
+							</td>
 						</tr>
 					{% empty %}
 					<tr>
+						<td class="empty">(none)</td>
 						<td class="answer">
-							<a href="{% url 'edit_answer' answer.id %}">{{ answer.answer }}</a>
+							<a href="{% url 'edit_answer' answer.id %}">{{ answer.answer }}</a>{% if answer.flexible %} (Flex){% endif %}
 						</td>
-						<td colspan="6" class="empty">--</td>
+						<td class="answer-hidden empty">(hidden)</td>
+						<td colspan="6"></td>
 					</tr>
 					{% endfor %}
 				{% endfor %}
 			</table>
+			{% if not eic_view and round.num_unspoiled %}
+				<div class="empty">(+{{ round.num_unspoiled }} unspoiled)</div>
+			{% endif %}
 		</div>
 	</div>
 </div>

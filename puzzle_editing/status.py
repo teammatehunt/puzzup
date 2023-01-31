@@ -6,19 +6,18 @@ AWAITING_EDITOR = "AE"
 NEEDS_DISCUSSION = "ND"
 WAITING_FOR_ROUND = "WR"
 AWAITING_REVIEW = "AR"
-IDEA_IN_DEVELOPMENT = "ID"
-# IDEA_IN_DEVELOPMENT_ASSIGNED = "IA"
 AWAITING_ANSWER = "AA"
 WRITING = "W"
 WRITING_FLEXIBLE = "WF"
-AWAITING_APPROVAL_FOR_TESTSOLVING = "AT"
+AWAITING_EDITOR_PRE_TESTSOLVE = "AT"
 TESTSOLVING = "T"
 AWAITING_TESTSOLVE_REVIEW = "TR"
 REVISING = "R"
 REVISING_POST_TESTSOLVING = "RP"
 AWAITING_APPROVAL_POST_TESTSOLVING = "AO"
+NEEDS_SOLUTION_SKETCH = "SS"
 NEEDS_SOLUTION = "NS"
-AWAITING_SOLUTION_APPROVAL = "AS"
+AWAITING_SOLUTION_AND_HINTS_APPROVAL = "AS"
 NEEDS_POSTPROD = "NP"
 ACTIVELY_POSTPRODDING = "PP"
 POSTPROD_BLOCKED = "PB"
@@ -26,9 +25,9 @@ POSTPROD_BLOCKED_ON_TECH = "BT"
 AWAITING_POSTPROD_APPROVAL = "AP"
 NEEDS_FACTCHECK = "NF"
 NEEDS_COPY_EDITS = "NC"
+NEEDS_ART_CHECK = "NA"
+NEEDS_FINAL_DAY_FACTCHECK = "NK"
 NEEDS_FINAL_REVISIONS = "NR"
-NEEDS_HINTS = "NH"
-AWAITING_HINTS_APPROVAL = "AH"
 DONE = "D"
 DEFERRED = "DF"
 DEAD = "X"
@@ -42,19 +41,18 @@ STATUSES = [
     NEEDS_DISCUSSION,
     WAITING_FOR_ROUND,
     AWAITING_REVIEW,
-    IDEA_IN_DEVELOPMENT,
-    # IDEA_IN_DEVELOPMENT_ASSIGNED,
     AWAITING_ANSWER,
     WRITING,
     WRITING_FLEXIBLE,
-    AWAITING_APPROVAL_FOR_TESTSOLVING,
+    AWAITING_EDITOR_PRE_TESTSOLVE,
     TESTSOLVING,
     AWAITING_TESTSOLVE_REVIEW,
     REVISING,
     REVISING_POST_TESTSOLVING,
     AWAITING_APPROVAL_POST_TESTSOLVING,
+    NEEDS_SOLUTION_SKETCH,
     NEEDS_SOLUTION,
-    AWAITING_SOLUTION_APPROVAL,
+    AWAITING_SOLUTION_AND_HINTS_APPROVAL,
     NEEDS_POSTPROD,
     ACTIVELY_POSTPRODDING,
     POSTPROD_BLOCKED,
@@ -63,8 +61,8 @@ STATUSES = [
     NEEDS_FACTCHECK,
     NEEDS_FINAL_REVISIONS,
     NEEDS_COPY_EDITS,
-    NEEDS_HINTS,
-    AWAITING_HINTS_APPROVAL,
+    NEEDS_ART_CHECK,
+    NEEDS_FINAL_DAY_FACTCHECK,
     DONE,
     DEFERRED,
     DEAD,
@@ -116,7 +114,7 @@ BLOCKERS_AND_TRANSITIONS = {
             (AWAITING_REVIEW, "✅ Editors assigned 🤷🏽‍♀️ No answer yet"),
             (NEEDS_DISCUSSION, "🗣 Need to discuss with EICs"),
             (INITIAL_IDEA, "🔄 Puzzle needs more work"),
-        ]
+        ],
     ),
     NEEDS_DISCUSSION: (
         EIC,
@@ -124,7 +122,7 @@ BLOCKERS_AND_TRANSITIONS = {
             (AWAITING_REVIEW, "✅ Editors assigned 👍 Answer confirmed"),
             (AWAITING_REVIEW, "✅ Editors assigned 🤷🏽‍♀️ No answer yet"),
             (INITIAL_IDEA, "🔄 Send back to author(s)"),
-        ]
+        ],
     ),
     WAITING_FOR_ROUND: (
         EIC,
@@ -132,59 +130,42 @@ BLOCKERS_AND_TRANSITIONS = {
             (AWAITING_REVIEW, "✅ Editors assigned 👍 Answer confirmed"),
             (AWAITING_REVIEW, "✅ Editors assigned 🤷🏽‍♀️ No answer yet"),
             (INITIAL_IDEA, "🔄 Send back to author(s)"),
-        ]
+        ],
     ),
     AWAITING_REVIEW: (
         EDITORS,
         [
-            (IDEA_IN_DEVELOPMENT, "❌ Request revision"),
-            # (IDEA_IN_DEVELOPMENT_ASSIGNED, "❌ Request revision with answer"),
             (AWAITING_ANSWER, "✅ Idea approved 🤷🏽‍♀️ need answer"),
             (WRITING, "✅ Idea approved 👍 Answer assigned"),
             (TESTSOLVING, "✏️ Ready to testsolve!"),
         ],
     ),
-    IDEA_IN_DEVELOPMENT: (
-        AUTHORS,
-        [
-            (AWAITING_REVIEW, "📝 Request review"),
-            # (IDEA_IN_DEVELOPMENT_ASSIGNED, "✅ Mark as answer assigned"),
-            (TESTSOLVING, "✏️ Ready to testsolve!"),
-        ],
-    ),
-    # IDEA_IN_DEVELOPMENT_ASSIGNED: (
-    #     AUTHORS,
-    #     [
-    #         (WRITING, "📝 Mark as writing"),
-    #         (AWAITING_APPROVAL_FOR_TESTSOLVING, "📝 Request approval for testsolving"),
-    #         (TESTSOLVING, "✅ Put into testsolving"),
-    #     ],
-    # ),
     AWAITING_ANSWER: (
         EIC,
         [
             (WRITING, "✅ Mark as answer assigned"),
-        ]
+        ],
     ),
     WRITING: (
         AUTHORS,
         [
             (AWAITING_ANSWER, "❌ Reject answer"),
-            (AWAITING_APPROVAL_FOR_TESTSOLVING, "📝 Request approval for testsolving"),
+            (AWAITING_EDITOR_PRE_TESTSOLVE, "📝 Request Editor Pre-testsolve"),
         ],
     ),
     WRITING_FLEXIBLE: (
         AUTHORS,
         [
             (WRITING, "✅ Mark as answer assigned"),
-            (AWAITING_APPROVAL_FOR_TESTSOLVING, "📝 Request approval for testsolving"),
+            (AWAITING_EDITOR_PRE_TESTSOLVE, "📝 Request Editor Pre-testsolve"),
         ],
     ),
-    AWAITING_APPROVAL_FOR_TESTSOLVING: (
+    AWAITING_EDITOR_PRE_TESTSOLVE: (
         EDITORS,
         [
             (TESTSOLVING, "✅ Puzzle is ready to be testsolved"),
             (REVISING, "❌ Request puzzle revision"),
+            (NEEDS_SOLUTION_SKETCH, "📝 Request Solution Sketch"),
         ],
     ),
     TESTSOLVING: (
@@ -192,13 +173,16 @@ BLOCKERS_AND_TRANSITIONS = {
         [
             (AWAITING_TESTSOLVE_REVIEW, "🧐 Testsolve done; author to review feedback"),
             (REVISING, "❌ Testsolve done; needs revision and more testsolving"),
-            (REVISING_POST_TESTSOLVING, "⭕ Testsolve done; needs revision (but not testsolving)"),
+            (
+                REVISING_POST_TESTSOLVING,
+                "⭕ Testsolve done; needs revision (but not testsolving)",
+            ),
         ],
     ),
     AWAITING_TESTSOLVE_REVIEW: (
         AUTHORS,
         [
-            (TESTSOLVING, "🔄 Ready for more testsolving"),
+            (AWAITING_EDITOR_PRE_TESTSOLVE, "🔄 Ready for editor pre-testsolve"),
             (REVISING, "❌ Needs revision (then more testsolving)"),
             (REVISING_POST_TESTSOLVING, "⭕ Needs revision (but can skip testsolving)"),
             (AWAITING_APPROVAL_POST_TESTSOLVING, "📝 Send to editors for approval"),
@@ -209,35 +193,53 @@ BLOCKERS_AND_TRANSITIONS = {
     REVISING: (
         AUTHORS,
         [
-            (AWAITING_APPROVAL_FOR_TESTSOLVING, "📝 Request approval for testsolving"),
+            (AWAITING_EDITOR_PRE_TESTSOLVE, "📝 Request Editor Pre-testsolve"),
             (TESTSOLVING, "⏩ Put into testsolving"),
-            (AWAITING_APPROVAL_POST_TESTSOLVING, "⏭️  Request approval to skip testsolving" ),
+            (
+                AWAITING_APPROVAL_POST_TESTSOLVING,
+                "⏭️  Request approval to skip testsolving",
+            ),
         ],
     ),
     REVISING_POST_TESTSOLVING: (
         AUTHORS,
         [
-            (AWAITING_APPROVAL_POST_TESTSOLVING, "📝 Request approval for post-testsolving"),
+            (
+                AWAITING_APPROVAL_POST_TESTSOLVING,
+                "📝 Request approval for post-testsolving",
+            ),
             (NEEDS_SOLUTION, "⏩ Mark revision as done"),
         ],
     ),
     AWAITING_APPROVAL_POST_TESTSOLVING: (
         EDITORS,
         [
-            (REVISING_POST_TESTSOLVING, "❌ Request puzzle revision (done with testsolving)"),
+            (
+                REVISING_POST_TESTSOLVING,
+                "❌ Request puzzle revision (done with testsolving)",
+            ),
             (TESTSOLVING, "🔙 Return to testsolving"),
             (NEEDS_SOLUTION, "✅ Accept revision; request solution"),
             (NEEDS_POSTPROD, "⏩ Accept revision and solution; request postprod"),
         ],
     ),
+    NEEDS_SOLUTION_SKETCH: (
+        AUTHORS,
+        [
+            (AWAITING_EDITOR_PRE_TESTSOLVE, "📝 Request Editor Pre-testsolve"),
+        ],
+    ),
     NEEDS_SOLUTION: (
         AUTHORS,
         [
-            (AWAITING_SOLUTION_APPROVAL, "📝 Request approval for solution"),
+            (
+                AWAITING_SOLUTION_AND_HINTS_APPROVAL,
+                "📝 Request approval for solution and hints",
+            ),
             (NEEDS_POSTPROD, "✅ Mark solution as finished; request postprod"),
         ],
     ),
-    AWAITING_SOLUTION_APPROVAL: (
+    AWAITING_SOLUTION_AND_HINTS_APPROVAL: (
         EDITORS,
         [
             (NEEDS_SOLUTION, "❌ Request revisions to solution"),
@@ -281,19 +283,23 @@ BLOCKERS_AND_TRANSITIONS = {
         ],
     ),
     AWAITING_POSTPROD_APPROVAL: (
-        EDITORS,
+        AUTHORS,
         [
             (ACTIVELY_POSTPRODDING, "❌ Request revisions to postprod"),
             (NEEDS_FACTCHECK, "⏩ Mark postprod as finished; request factcheck"),
         ],
     ),
     NEEDS_FACTCHECK: (
-        AUTHORS, #FACTCHECKERS,
+        FACTCHECKERS,
         [
             (REVISING, "❌ Request large revisions (needs more testsolving)"),
-            (REVISING_POST_TESTSOLVING, "❌ Request large revisions (doesn't need testsolving)"),
+            (
+                REVISING_POST_TESTSOLVING,
+                "❌ Request large revisions (doesn't need testsolving)",
+            ),
             (NEEDS_FINAL_REVISIONS, "🟡 Needs minor revisions"),
-            (NEEDS_HINTS, "✅ Needs Hints"),
+            (NEEDS_ART_CHECK, "🎨 Needs art check"),
+            (NEEDS_FINAL_DAY_FACTCHECK, "📆 Needs final day factcheck"),
             (DONE, "⏩🎆 Mark as done! 🎆⏩"),
         ],
     ),
@@ -307,29 +313,20 @@ BLOCKERS_AND_TRANSITIONS = {
     NEEDS_COPY_EDITS: (
         FACTCHECKERS,
         [
-            (NEEDS_HINTS, "✅ Needs Hints"),
-            (DONE, "⏩🎆 Mark as done! 🎆⏩"),
-        ]
-    ),
-    NEEDS_HINTS: (
-        AUTHORS,
-        [
-            (AWAITING_HINTS_APPROVAL, "📝 Request approval for hints"),
+            (NEEDS_ART_CHECK, "🎨 Needs art check"),
+            (NEEDS_FINAL_DAY_FACTCHECK, "📆 Needs final day factcheck"),
             (DONE, "⏩🎆 Mark as done! 🎆⏩"),
         ],
     ),
-    AWAITING_HINTS_APPROVAL: (
-        EDITORS,
+    NEEDS_FINAL_DAY_FACTCHECK: (
+        FACTCHECKERS,
         [
-            (NEEDS_HINTS, "❌ Request revisions to hints"), (DONE, "✅🎆 Mark as done! 🎆✅"),
             (DONE, "⏩🎆 Mark as done! 🎆⏩"),
         ],
     ),
     DEFERRED: (
         NOBODY,
-        [
-            (IDEA_IN_DEVELOPMENT, "✅ Back in development"),
-        ]
+        [],
     ),
 }
 
@@ -346,12 +343,14 @@ def get_transitions(status, puzzle=None):
     value = BLOCKERS_AND_TRANSITIONS.get(status)
     if value:
         # add any transition logic here
+        additions = []
         exclusions = []
-        if puzzle:
-            if puzzle.editors.all().exists():
-                exclusions.append(AWAITING_EDITOR)
+        if puzzle and puzzle.editors.exists():
+            exclusions.append(AWAITING_EDITOR)
+            if status == INITIAL_IDEA:
+                additions.append((AWAITING_REVIEW, "📝 Send to editors for input"))
 
-        return [s for s in value[1] if (not s[0] in exclusions)]
+        return [s for s in [*additions, *value[1]] if s[0] not in exclusions]
     else:
         return []
 
@@ -372,20 +371,19 @@ DESCRIPTIONS = {
     AWAITING_EDITOR: "Awaiting Approval By EIC",
     NEEDS_DISCUSSION: "EICs are Discussing",
     WAITING_FOR_ROUND: "Waiting for Round to Open",
-    AWAITING_REVIEW: "Awaiting Input By Editor",
-    IDEA_IN_DEVELOPMENT: "Idea in Development",
-    # IDEA_IN_DEVELOPMENT_ASSIGNED: "Idea in Development (Answer Assigned)",
+    AWAITING_REVIEW: "Awaiting Input By Editor(s)",
     AWAITING_ANSWER: "Awaiting Answer",
     WRITING: "Writing (Answer Assigned)",
     WRITING_FLEXIBLE: "Writing (Answer Flexible)",
-    AWAITING_APPROVAL_FOR_TESTSOLVING: "Awaiting Approval for Testsolving",
+    AWAITING_EDITOR_PRE_TESTSOLVE: "Awaiting Editor Pre-testsolve",
     TESTSOLVING: "Ready to be Testsolved",
     AWAITING_TESTSOLVE_REVIEW: "Awaiting Testsolve Review",
     REVISING: "Revising (Needs Testsolving)",
     REVISING_POST_TESTSOLVING: "Revising (Done with Testsolving)",
     AWAITING_APPROVAL_POST_TESTSOLVING: "Awaiting Approval (Done with Testsolving)",
+    NEEDS_SOLUTION_SKETCH: "Needs Solution Sketch",
     NEEDS_SOLUTION: "Needs Solution",
-    AWAITING_SOLUTION_APPROVAL: "Awaiting Solution Approval",
+    AWAITING_SOLUTION_AND_HINTS_APPROVAL: "Awaiting Solution and Hints Approval",
     POSTPROD_BLOCKED: "Postproduction Blocked",
     POSTPROD_BLOCKED_ON_TECH: "Postproduction Blocked On Tech Request",
     NEEDS_POSTPROD: "Ready for Postprodding",
@@ -394,8 +392,8 @@ DESCRIPTIONS = {
     NEEDS_FACTCHECK: "Needs Factcheck",
     NEEDS_FINAL_REVISIONS: "Needs Final Revisions",
     NEEDS_COPY_EDITS: "Needs Copy Edits",
-    NEEDS_HINTS: "Needs Hints",
-    AWAITING_HINTS_APPROVAL: "Awaiting Hints Approval",
+    NEEDS_ART_CHECK: "Needs Art Check",
+    NEEDS_FINAL_DAY_FACTCHECK: "Needs Final Day Factcheck",
     DONE: "Done",
     DEFERRED: "Deferred",
     DEAD: "Dead",
@@ -411,7 +409,7 @@ EMOJIS = {
     AWAITING_REVIEW: "👒",
     WRITING: "✏️",
     WRITING_FLEXIBLE: "✏️",
-    AWAITING_APPROVAL_FOR_TESTSOLVING: "⏳✅",
+    AWAITING_EDITOR_PRE_TESTSOLVE: "⏳✅",
     TESTSOLVING: "💡",
     REVISING: "✏️🔄",
     REVISING_POST_TESTSOLVING: "✏️🔄",
@@ -420,10 +418,10 @@ EMOJIS = {
     POSTPROD_BLOCKED: "⚠️✏️",
     POSTPROD_BLOCKED_ON_TECH: "⚠️💻",
     AWAITING_POSTPROD_APPROVAL: "🧐",
-    NEEDS_HINTS: "⁉",
-    AWAITING_HINTS_APPROVAL: "🔍",
     NEEDS_COPY_EDITS: "📃",
+    NEEDS_FINAL_DAY_FACTCHECK: "📆",
     NEEDS_FACTCHECK: "📋",
+    NEEDS_ART_CHECK: "🎨",
     NEEDS_FINAL_REVISIONS: "🔬",
     DONE: "🏁",
     DEFERRED: "💤",
@@ -440,11 +438,13 @@ MAX_LENGTH = 2
 def get_display(status):
     return DESCRIPTIONS.get(status, status)
 
+
 def get_emoji(status):
     return EMOJIS.get(status, "")
 
+
 def get_template(status):
-    return TEMPLATES.get(status, 'status_update_email')
+    return TEMPLATES.get(status, "status_update_email")
 
 
 ALL_STATUSES = [
@@ -455,3 +455,13 @@ ALL_STATUSES = [
     }
     for status, description in DESCRIPTIONS.items()
 ]
+
+
+def get_message_for_status(status, puzzle, status_display):
+    additional_msg = ""
+    if status == AWAITING_POSTPROD_APPROVAL:
+        postprod_url = puzzle.postprod_url
+        if postprod_url:
+            additional_msg = f"\nView the postprod at {postprod_url}"
+
+    return f"This puzzle is now **{status_display}**." + additional_msg

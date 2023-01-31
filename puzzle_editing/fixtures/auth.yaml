@@ -18,6 +18,5 @@
         display_name: ''
         credits_name: ''
         bio: ''
-        enable_keyboard_shortcuts: false
         groups: []
         user_permissions: []

@@ -5,12 +5,19 @@
 {% block main %}
 <h1>Tag {{ puzzle }}</h1>
 <a href="{% url 'puzzle' puzzle.id %}">🔙 to {{ puzzle }}</a>
-<a href="{% url 'tags' %}">View/edit all tags</a>
 {% if spoiled %}
 <form method="post">
 	{% csrf_token %}
-	{% for field in form %}
-		{{ field }}
+	{% for value, label, tag in form.tags.field.choices %}
+	<div>
+		<li class="flex-row">
+			<div>
+				<input type="checkbox" id="tag-{{ value }}" value="{{ value }}" name="tags" {% if value in form.tags.field.initial %}checked{% endif %}>
+				<label for="tag-{{ value }}"><b>{{ label }}</b></label>
+			</div>
+			<div style="margin-left:3em">{{ tag.description }}</div>
+		</li>
+	</div>
 	{% endfor %}
 	<input type="submit" value="Submit">
 </form>

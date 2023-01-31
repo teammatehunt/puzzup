@@ -7,10 +7,14 @@
 	for="hide-dead-{{ random_id }}">Hide dead puzzles</label>
 <input id="hide-deferred-{{ random_id }}" type="checkbox" class="hide-deferred" checked> <label
 	for="hide-deferred-{{ random_id }}">Hide deferred puzzles</label>
+{% if show_factcheck %}
+<input id="hide-fact-assigned-{{ random_id }}" type="checkbox" class="hide-fact-assigned" checked> <label
+	for="hide-fact-assigned-{{ random_id }}">Hide assigned</label>
+{% endif %}
 <input id="hide-visited-{{ random_id }}" type="checkbox" class="hide-visited"> <label
 	for="hide-visited-{{ random_id }}">Only show spoiled+unvisited</label>
 <input id="hide-past-solution-{{ random_id }}" type="checkbox" class="hide-past-solution"> <label
-	for="hide-past-solution-{{ random_id }}">Hide puzzles &ge; Needs Solution</label>
+	for="hide-past-solution-{{ random_id }}">Hide puzzles &ge; Awaiting Solution Approval</label>
 <input id="show-only-answer-{{ random_id }}" type="checkbox" class="show-only-answer"> <label
 	for="show-only-answer-{{ random_id }}">Show only puzzles with answers</label>
 
@@ -18,14 +22,25 @@
 	<table class="table is-striped classic sortable">
 		<tr align="left">
 			<th>🤔</th>
+			{% if show_round %}
+			<th>Round</th>
+			{% endif %}
 			<th>ID/Name</th>
 			<th>Status</th>
+			{% if show_last_status_change %}
 			<th>Last Status Change</th>
+			{% endif %}
 			<th>Authors</th>
+			{% if show_factcheck %}
+			<th>Factcheckers</th>
+			{% endif %}
 			{% if show_summary %}
 			<th>Summary</th>
 			{% endif %}
-			<th>Priority</th>
+			{% if show_flavor %}
+			<th>Flavor</th>
+			<th>Approved</th>
+			{% endif %}
 			{% if show_editors %}
 			<th>Editors</th>
 			{% endif %}
@@ -36,7 +51,7 @@
 		</tr>
 		{% for puzzle in puzzles %}
 		<tr
-			class="puzzle-row {% if puzzle.status == dead_status %}dead{% elif puzzle.status == deferred_status %}deferred{% elif puzzle.status in past_needs_solution_statuses %}past_needs_solution{% endif %} {% if puzzle.is_spoiled %}spoiled {% if not puzzle.last_visited_date or puzzle.last_comment_date and puzzle.last_comment_date > puzzle.last_visited_date %}unvisited{% endif %}{% endif %} {% if puzzle.has_answer %}answered{%endif%}">
+			class="puzzle-row {% if puzzle.status == dead_status %}dead{% elif puzzle.status == deferred_status %}deferred{% elif puzzle.status in past_needs_solution_statuses %}past_needs_solution{% endif %} {% if puzzle.is_spoiled %}spoiled {% if not puzzle.last_visited_date or puzzle.last_comment_date and puzzle.last_comment_date > puzzle.last_visited_date %}unvisited{% endif %}{% endif %} {% if puzzle.has_answer %}answered{%endif%} {% if show_factcheck and puzzle.factcheckers.count > 0 %}factchecker{%endif%}">
 			{% if puzzle.is_author %}
 			<td sorttable_customkey="1" title="You are an author">📝</td>
 			{% elif puzzle.is_editing %}
@@ -50,15 +65,26 @@
 			{% else %}
 			<td sorttable_customkey="99" title="You are not spoiled">❓</td>
 			{% endif %}
+			{% if show_round %}
+			<td class="{% if not puzzle.round_name %}empty{% endif %}">{{ puzzle.round_name | default:"None"}}</td>
+			{% endif %}
 			<td sorttable_customkey="{{ puzzle.id }}">{{ puzzle.html_link }}</td>
 		{% if limit is None or forloop.counter0 < limit %}
 			<td sorttable_customkey="{{ puzzle.get_status_rank }}"><span class="tag">{{ puzzle.get_status_emoji }} {{ puzzle.get_status_display }}</span></td>
+			{% if show_last_status_change %}
 			<td class="timestamp" sorttable_customkey="{{ puzzle.status_mtime.timestamp }}">{{ puzzle.status_mtime | naturaltime }}</td>
+			{% endif %}
 			<td>{{ puzzle.authors_html }}</td>
+			{% if show_factcheck %}
+			<td>{{ puzzle.factcheck_html }}</td>
+			{% endif %}
 			{% if show_summary %}
 			<td class="small-md">{{ puzzle.summary }}</td>
 			{% endif %}
-			<td sorttable_customkey="{{ puzzle.priority }}"><span class="tag">{{ puzzle.get_priority_display }}</span></td>
+			{% if show_flavor %}
+			<td class="small-md">{{ puzzle.flavor }}</td>
+			<td class="small-md" sorttable_customkey="{{ puzzle.flavor_approved_time.timestamp }}">{{ puzzle.flavor_approved_time | naturaltime }}</td>
+			{% endif %}
 			{% if show_editors %}
 			<td>{{ puzzle.opt_editors|length }} / {{ puzzle.needed_editors }}: {{ puzzle.editors_html }}</td>
 			{% endif %}

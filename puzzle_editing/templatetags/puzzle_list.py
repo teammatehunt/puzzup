@@ -14,9 +14,10 @@ from puzzle_editing.models import User
 register = template.Library()
 
 
-def make_puzzle_data(puzzles, user, do_query_filter_in):
+def make_puzzle_data(puzzles, user, do_query_filter_in, show_factcheck=False):
     puzzles = (
-        puzzles.order_by("priority").annotate(
+        puzzles.order_by("priority")
+        .annotate(
             is_spoiled=Exists(
                 User.objects.filter(spoiled_puzzles=OuterRef("pk"), id=user.id)
             ),
@@ -39,10 +40,9 @@ def make_puzzle_data(puzzles, user, do_query_filter_in):
                 )
             ),
         )
+        .prefetch_related("answers")
         # This prefetch is super slow.
-        # .prefetch_related(
-        #     "authors",
-        #     "editors",
+        # .prefetch_related("authors", "editors",
         #     Prefetch(
         #         "tags",
         #         queryset=PuzzleTag.objects.filter(important=True).only("name"),
@@ -55,8 +55,6 @@ def make_puzzle_data(puzzles, user, do_query_filter_in):
     puzzles = list(puzzles)
 
     for puzzle in puzzles:
-        puzzle.opt_authors = []
-        puzzle.opt_editors = []
         puzzle.prefetched_important_tag_names = []
 
     puzzle_ids = [puzzle.id for puzzle in puzzles]
@@ -77,14 +75,35 @@ def make_puzzle_data(puzzles, user, do_query_filter_in):
                 tag_name
             )
 
-    authorships = User.objects
+    for puzzle in puzzles:
+        # These are dictionaries username -> (username, display_name)
+        puzzle.opt_authors = {}
+        puzzle.opt_editors = {}
+        puzzle.opt_factcheckers = {}
+
+    authors = (
+        User.objects.all()
+        .prefetch_related("authored_puzzles")
+        .prefetch_related("led_puzzles")
+    )
     if do_query_filter_in:
-        authorships = authorships.filter(authored_puzzles__in=puzzle_ids)
-    for username, display_name, puzzle_id in authorships.values_list(
-        "username", "display_name", "authored_puzzles"
-    ):
-        if puzzle_id in id_to_index:
-            puzzles[id_to_index[puzzle_id]].opt_authors.append((username, display_name))
+        authors = authors.filter(authored_puzzles__in=puzzle_ids)
+    for author in authors:
+        username = author.username
+        display_name = str(author)
+        for puzzle in author.authored_puzzles.all():
+            if puzzle.pk in id_to_index:
+                puzzles[id_to_index[puzzle.pk]].opt_authors[username] = (
+                    username,
+                    display_name,
+                )
+        # Augment name with (L) if lead author
+        for puzzle in author.led_puzzles.all():
+            if puzzle.pk in id_to_index:
+                puzzles[id_to_index[puzzle.pk]].opt_authors[username] = (
+                    username + " (L)",
+                    display_name + " (L)",
+                )
 
     editorships = User.objects
     if do_query_filter_in:
@@ -93,15 +112,40 @@ def make_puzzle_data(puzzles, user, do_query_filter_in):
         "username", "display_name", "editing_puzzles"
     ):
         if puzzle_id in id_to_index:
-            puzzles[id_to_index[puzzle_id]].opt_editors.append((username, display_name))
+            puzzles[id_to_index[puzzle_id]].opt_editors[username] = (
+                username,
+                display_name,
+            )
+
+    if show_factcheck:
+        factcheckerships = User.objects
+        for username, display_name, puzzle_id in factcheckerships.values_list(
+            "username", "display_name", "factchecking_puzzles"
+        ):
+            if puzzle_id in id_to_index:
+                puzzles[id_to_index[puzzle_id]].opt_factcheckers[username] = (
+                    username,
+                    display_name,
+                )
+
+    def sort_key(user):
+        """Sort by lead, then display name, then username"""
+        username, display_name = user
+        if display_name.endswith("(L)"):
+            return ("", "")  # Earliest string
+
+        return (display_name.lower(), username.lower())
 
     for puzzle in puzzles:
-        puzzle.authors_html = User.html_user_list_of_flat(
-            puzzle.opt_authors, linkify=False
-        )
-        puzzle.editors_html = User.html_user_list_of_flat(
-            puzzle.opt_editors, linkify=False
-        )
+        authors = sorted(puzzle.opt_authors.values(), key=sort_key)
+        editors = sorted(puzzle.opt_editors.values(), key=sort_key)
+        puzzle.authors_html = User.html_user_list_of_flat(authors, linkify=False)
+        puzzle.editors_html = User.html_user_list_of_flat(editors, linkify=False)
+        if show_factcheck:
+            factcheckers = sorted(puzzle.opt_factcheckers.values(), key=sort_key)
+            puzzle.factcheck_html = User.html_user_list_of_flat(
+                factcheckers, linkify=False
+            )
 
     return puzzles
 
@@ -111,7 +155,18 @@ def make_puzzle_data(puzzles, user, do_query_filter_in):
 
 
 @register.inclusion_tag("tags/puzzle_list.html", takes_context=True)
-def puzzle_list(context, puzzles, user, with_new_link=False, show_summary=True, show_editors=True):
+def puzzle_list(
+    context,
+    puzzles,
+    user,
+    with_new_link=False,
+    show_last_status_change=True,
+    show_summary=True,
+    show_editors=True,
+    show_round=False,
+    show_flavor=False,
+    show_factcheck=False,
+):
     req = context["request"]
     limit = None
     if req.method == "GET" and "limit" in req.GET:
@@ -123,7 +178,10 @@ def puzzle_list(context, puzzles, user, with_new_link=False, show_summary=True, 
     return {
         "limit": limit,
         "puzzles": make_puzzle_data(
-            puzzles, user, do_query_filter_in=req.path != "/all"
+            puzzles,
+            user,
+            do_query_filter_in=req.path != "/all",
+            show_factcheck=show_factcheck,
         ),
         "new_puzzle_link": with_new_link,
         "dead_status": status.DEAD,
@@ -134,7 +192,11 @@ def puzzle_list(context, puzzles, user, with_new_link=False, show_summary=True, 
             if status.get_status_rank(st["value"])
             > status.get_status_rank(status.NEEDS_SOLUTION)
         ],
-        "random_id": "%016x" % random.randrange(16 ** 16),
+        "random_id": "%016x" % random.randrange(16**16),
+        "show_last_status_change": show_last_status_change,
         "show_summary": show_summary,
         "show_editors": show_editors,
+        "show_round": show_round,
+        "show_flavor": show_flavor,
+        "show_factcheck": show_factcheck,
     }

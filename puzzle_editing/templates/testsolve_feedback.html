@@ -1,4 +1,6 @@
 {% extends "base.html" %}
+{% load markdown %}
+{% load name_list %}
 {% block title %}{{ title }}{% endblock %}
 
 {% block main %}
@@ -24,7 +26,7 @@
 {% for session in session_list %}
 <h3>Testsolve session <a href="{% url 'testsolve_one' session.grouper.id %}">#{{ session.grouper.id }}</a> on {{ session.grouper.puzzle.name }}</h3>
 {% for part in session.list %}
-<h4>{{ part.user.credits_name }}</h4>
+<h4>{{ part.user|display_name }}</h4>
 <div class="columns">
 	<div class="column is-one-fifth">
 		<div class="tags has-addons are-small">
@@ -39,78 +41,12 @@
 			<span class="tag is-info">{{ part.hours_spent | floatformat }}</span>
 			<span class="tag is-dark">Hours</span>
 		</div>
-		<div class="tags has-addons are-small">
-			{% if part.technical_issues %}
-			<span class="tag is-danger">Yes</span>
-			{% else %}
-			<span class="tag is-success">No</span>
-			{% endif %}
-			<span class="tag is-dark">Tech issues?</span>
-		</div>
-		<div class="tags has-addons are-small">
-			{% if part.instructions_overall %}
-			<span class="tag is-success">Yes</span>
-			{% else %}
-			<span class="tag is-danger">No</span>
-			{% endif %}
-			<span class="tag is-dark">Instructions clear?</span>
-		</div>
-		<div class="tags has-addons are-small">
-			<span class="tag is-info">{{ part.flavortext_overall }}</span>
-			<span class="tag is-dark">Flavortext</span>
-		</div>
-		<div class="tags has-addons are-small">
-			{% if part.stuck_overall %}
-			<span class="tag is-danger">Yes</span>
-			{% else %}
-			<span class="tag is-success">No</span>
-			{% endif %}
-			<span class="tag is-dark">Got stuck?</span>
-		</div>
 	</div>
 	<div class="column">
-		<h5>Did you solve the complete puzzle or did you shortcut?</h5>
-		<p>{{ part.clues_needed|default:"No feedback provided" }}</p>
-		<h5>Enjoyable aspects</h5>
-		<p>{{ part.aspects_enjoyable|default:"No feedback provided" }}</p>
-		<h5>Unenjoyable aspects</h5>
-		<p>{{ part.aspects_unenjoyable|default:"No feedback provided" }}</p>
-		<h5>Accessibility feedback</h5>
-		<p>{{ part.aspects_accessibility|default:"No accessibility feedback" }}</p>
-		<h5>Technical issues</h5>
-		{% if part.technical_issues %}
-		<h6>Device information</h6>
-		<p>{{ part.technical_issues_device|default:"No device information provided" }}</p>
-		<h6>Issue description</h6>
-		<p>{{ part.technical_issues_description |default:"No issue description provided"}}</p>
-		{% else %}
-		<p>None.</p>
-		{% endif %}
-		<h5>Instructions</h5>
-		<p>{{ part.instructions_feedback|default:"No instructions feedback" }}</p>
-
-		<h5>Flavortext</h5>
-		<p>{{ part.flavortext_feedback|default:"No flavortext feedback" }}</p>
-
-		<h5>Stuck</h5>
-		{% if part.stuck_overall %}
-
-		<h6>Where did you get stuck?</h6>
-		<p>{{ part.stuck_points|default:"No feedback provided" }}</p>
-		<p><strong>Stuck for:</strong> {{ part.stuck_time }} hour{{ part.stuck_time|pluralize}}</p>
-		<h6>What helped you get unstuck?</h6>
-		<p>{{ part.stuck_unstuck|default:"No feedback provided" }}</p>
-
-		{% else %}
-		<p>Did not get stuck.</p>
-		{% endif %}
-
-		<h5>Errors found</h5>
-		<p>{{ part.errors_found|default:"No errors noted" }}</p>
-		<h5>Suggestions to change</h5>
-		<p>{{ part.suggestions_change|default:"No suggestions to change" }}</p>
-		<h5>Suggestions to keep</h5>
-		<p>{{ part.suggestions_keep|default:"No suggestions to keep" }}</p>
+		<h5>What did you like & dislike about this puzzle? Is there anything you think should be changed (e.g. amount of flavor/cluing, errata, tech issues, mechanics, theming, etc.)</h5>
+		<p>{{ part.general_feedback|default:"No feedback provided"|markdown }}</p>
+		<h5>Anything else you want to add? If you were spoiled, mention it here. (This can include: things you tried, any shortcuts you found, break-ins, stuck points, accessibility)</h5>
+		<p>{{ part.misc_feedback|default:"No feedback provided"|markdown }}</p>
 	</div>
 </div>
 <br/>

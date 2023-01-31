@@ -17,6 +17,7 @@
             <thead>
                 <tr>
                     <td>Order</td>
+                    <td>Description</td>
                     <td>Keywords</td>
                     <td>Content</td>
                     <td></td>
@@ -25,6 +26,7 @@
         {% for hint in puzzle.hints.all|dictsort:"order" %}
         <tr>
         <td>{{ hint.order }}</td>
+        <td>{{ hint.description }}</td>
         <td>{{ hint.keywords }}</td>
         <td>{{ hint.content }}</td>
         <td><a href="{% url 'edit_hint' hint.id %}">Edit/Delete</a></td>
@@ -60,7 +62,7 @@
             </div>
             {% endfor %}
 
-            <div class='columns {{ field.name }}'>
+            <div class="columns">
                 <div class="column is-offset-2">
                     <button type="submit" class="button is-info" name="add_hint">Add this hint</button>
                 </div>

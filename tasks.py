@@ -8,6 +8,7 @@ HUNT_SLUG = "puzzup"
 
 HEROKU_MANAGE = f"heroku run --app={HUNT_SLUG} python manage.py"
 
+
 @task
 def lint(c):
     c.run("pylint --disable=R,C,W0511 $(git ls-files '*.py')")
@@ -32,12 +33,16 @@ def export_users(c):
 
 @task
 def export_users_from_prod(c):
-    c.run(f"{HEROKU_MANAGE} dumpdata --format=yaml puzzle_editing.user --indent 4 > puzzle_editing/fixtures/auth.yaml")
+    c.run(
+        f"{HEROKU_MANAGE} dumpdata --format=yaml puzzle_editing.user --indent 4 > puzzle_editing/fixtures/auth.yaml"
+    )
 
 
 @task
 def export_prod(c):
-    c.run(f"{HEROKU_MANAGE} dumpdata --format=yaml puzzle_editing --indent 4 > puzzle_editing/fixtures/data.yaml")
+    c.run(
+        f"{HEROKU_MANAGE} dumpdata --format=yaml puzzle_editing --indent 4 > puzzle_editing/fixtures/data.yaml"
+    )
 
 
 @task
@@ -47,7 +52,9 @@ def prod_shell(c):
 
 @task
 def count_channels(c):
-    c.run(f"{HEROKU_MANAGE} shell -c 'from puzzle_editing.discord_integration import get_client;c=get_client();print(len(c.get_channels_in_guild()))'")
+    c.run(
+        f"{HEROKU_MANAGE} shell -c 'from puzzle_editing.discord_integration import get_client;c=get_client();print(len(c.get_channels_in_guild()))'"
+    )
 
 
 @task
@@ -59,6 +66,7 @@ def migrate(c):
 def load_users(c):
     c.run("./manage.py loaddata auth")
     c.run("./manage.py loaddata groups")
+
 
 @task
 def load_data(c):

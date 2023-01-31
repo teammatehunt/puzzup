@@ -7,7 +7,7 @@
 	{% if user.is_superuser and not them.is_superuser %}
 	<form method="POST">
 		{% csrf_token %}
-		{% if them.is_meta_editor %}
+		{% if them.is_editor %}
 		<small><span class="warning">This user is an editor</span></small>
 		<input class="button-sm is-info" type="submit" name="remove-editor" value="Remove editor role">
 		{% else %}

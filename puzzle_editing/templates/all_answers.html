@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load answer %}
 {% load markdown %}
 {% load name_list %}
 
@@ -10,7 +11,6 @@
 <h1>All available answers</h1>
 
 <p>Showing all answers, including ones already requested. If you'd prefer to only see a few possible answers at a time, visit the <a href="{% url 'random_answers' %}">🎲 Random Answers</a> page.</p>
-<p><strong>To request an answer, add it to the NOTES section of your puzzle here on PU.</strong></p>
 
 <input id="hide-assigned-to-other" type="checkbox" class="hide-assigned-to-other ui-only" checked> <label for="hide-assigned-to-other">Hide answers assigned to other puzzles</label>
 
@@ -33,17 +33,25 @@
 				<tr align="left">
 					<th>Answer</th>
 					<th>Requested by…</th>
+					<th>Flexible?</th>
+					<th>Act</th>
 					<th>Notes</th>
 				</tr>
 				{% for answer in round.answers %}
 					<tr class="{% if answer.puzzles|length > 0 %}assigned-to-other{% endif %}">
-						<td class="answer">{{ answer.answer }}</td>
+						<td class="answer">{% formatted_answer answer %}</td>
 						<td>
 							{% for puzzle in answer.puzzles %}
 							<a href="{% url "puzzle" puzzle.id %}" title="{{ puzzle.spoiler_free_name }}">🧩</a>
 							{% empty %}
 							--
 							{% endfor %}
+						</td>
+						<td class="small-md">
+							{% if answer.flexible %}✔ Yes{% else %}❌ No{% endif %}
+						</td>
+						<td class="small-md">
+							{% if round.act %}{{ round.act }}{% endif %}
 						</td>
 						<td class="small-md">
 							{% if answer.notes %}{{ answer.notes|markdown }}{% endif %}

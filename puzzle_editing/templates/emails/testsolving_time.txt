@@ -1,3 +1,23 @@
-{{ puzzle.spoiler_free_title }} is ready to be testsolved!
+{{ puzzle.spoiler_free_title }} ({{ puzzle.id }}) is ready to be testsolved!
 
-Head to {{ request.scheme }}://{{ request.get_host }}/docs#testsolving for instructions on what to do next.
+---
+Logistics Info
+
+Act: {{ puzzle.act_name | default:"(No act assigned)" }}
+
+Testsolving: {% if logistics_info.logistics_difficulty_testsolve %}{{ logistics_info.logistics_difficulty_testsolve }}{% else %}(not rated){% endif %}
+
+Number of Testsolvers: {% if logistics_info.logistics_number_testsolvers %}{{ logistics_info.logistics_number_testsolvers }}{% else %}(not rated){% endif %}
+
+Expected Testsolve Length: {% if logistics_info.logistics_testsolve_length %}{{ logistics_info.logistics_testsolve_length }}{% else %}(not rated){% endif %}
+
+Testsolver Specialized Skills: {% if logistics_info.logistics_testsolve_skills %}{{ logistics_info.logistics_testsolve_skills }}{% else %}(not rated){% endif %}
+
+Postprod: {% if logistics_info.logistics_difficulty_postprod %}{{ logistics_info.logistics_difficulty_postprod }}{% else %}(not rated){% endif %}
+
+
+Factcheck: {% if logistics_info.logistics_difficulty_factcheck %}{{ logistics_info.logistics_difficulty_factcheck }}{% else %}(not rated){% endif %}
+
+Specialized Puzzle Type: {% if logistics_info.logistics_specialized_type %}{{ logistics_info.logistics_specialized_type }}{% else %}No{% endif %}
+
+(This email was sent to the list of Testsolve Coordinators, because {{ user.full_display_name }} set the status to Ready to be Testsolved.)

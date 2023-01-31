@@ -42,7 +42,7 @@ exclude = [
     status.AWAITING_ANSWER,
     status.AWAITING_REVIEW,
     status.WRITING_FLEXIBLE,
-    status.AWAITING_APPROVAL_FOR_TESTSOLVING,
+    status.AWAITING_EDITOR_PRE_TESTSOLVE,
     status.REVISING,
     status.REVISING_POST_TESTSOLVING,
     # status.NEEDS_HINTS,
@@ -65,8 +65,12 @@ exclude = [
 #     status.DEFERRED: "💀",
 #     status.DEAD: "💀",
 
-def curr_puzzle_graph_b64(time: str, target_count, width:int=20, height:int=10):
-    comments = PuzzleComment.objects.filter(is_system=True).order_by("date")
+
+def curr_puzzle_graph_b64(time: str, target_count, width: int = 20, height: int = 10):
+    comments = (
+        PuzzleComment.objects.filter(is_system=True).order_by("date")
+        .select_related("puzzle")
+    )
     counts = Counter()
     curr_status = {}
     x = []
@@ -77,7 +81,6 @@ def curr_puzzle_graph_b64(time: str, target_count, width:int=20, height:int=10):
     ]
 
     for comment in comments:
-        print(comment.status_change)
         new_status = comment.status_change
         if new_status:
             counts[new_status] += 1
@@ -101,7 +104,7 @@ def curr_puzzle_graph_b64(time: str, target_count, width:int=20, height:int=10):
         ax.plot(x, [target_count for i in x], color=(0, 0, 0))
     handles, plabels = ax.get_legend_handles_labels()
     box = ax.get_position()
-    ax.set_position([box.x0, box.y0, box.width*0.8, box.height])
+    ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
     ax.legend(handles[::-1], plabels[::-1], loc="center left", bbox_to_anchor=(1, 0.5))
     buf = BytesIO()
     fig.savefig(buf, format="png")

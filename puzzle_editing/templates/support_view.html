@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% load user_list %}
 {% load markdown %}
+{% load name_list %}
 
 {% block title %}{{ support.get_team_display|title }} support for {{ support.puzzle.name }}{% endblock %}
 
@@ -19,16 +20,20 @@
                     {{ support.puzzle.get_status_display }}
             </div>
 			<div class="block">
-                    <h5>Author{{ support.puzzle.authors|pluralize }}</h5>
+                    <h5>Author{{ support.puzzle.authors.count|pluralize }}</h5>
                     {% user_list support.puzzle.authors linkify=True %}
             </div>
 			<div class="block">
-                    <h5>Editor{{ support.puzzle.authors|pluralize }}</h5>
+                    <h5>Editor{{ support.puzzle.authors.count|pluralize }}</h5>
                     {% user_list support.puzzle.editors linkify=True %}
             </div>
 			<div class="block">
                     <h5>Status</h5>
                     {{ support.get_status_display }}
+            </div>
+			<div class="block">
+                    <h5>Assignee{{ support.assignees.count|pluralize }}</h5>
+                    {% user_list support.assignees linkify=True %}
             </div>
 		</div>
     </div>
@@ -36,7 +41,7 @@
             <div class="box">
                 <h2>Author notes <button type="button" class="button is-small toggle-show" data-target="author-notes-form" data-rehide="Hide editing">Edit</button></h2>
                 {% if support.author_notes_updater %}
-                    <p><i>Last updated by {{ support.author_notes_updater.credits_name|default_if_none:"none" }} <time datetime="{{ support.author_notes_mtime }}">{{ support.author_notes_mtime|timesince }} ago</time></i></p>
+                    <p><i>Last updated by {{ support.author_notes_updater|display_name }} (<time datetime="{{ support.author_notes_mtime }}">{{ support.author_notes_mtime|timesince }} ago</time>)</i></p>
                 {% endif %}
                 <form method="POST" id="author-notes-form" class="hidden">
                     {% csrf_token %}
@@ -57,7 +62,7 @@
             <div class="box">
                 <h2>Team notes <button type="button" class="button is-small toggle-show" data-target="team-notes-form" data-rehide="Hide editing">Edit</button></h2>
                 {% if support.team_notes_updater %}
-                    <p><i>Last updated by {{ support.team_notes_updater.credits_name|default_if_none:"none" }} <time datetime="{{ support.team_notes_mtime }}">{{ support.team_notes_mtime|timesince }} ago</time></i></p>
+                    <p><i>Last updated by {{ support.team_notes_updater|display_name }} (<time datetime="{{ support.team_notes_mtime }}">{{ support.team_notes_mtime|timesince }} ago</time>)</i></p>
                 {% endif %}
                 <form method="POST" id="team-notes-form" class="hidden">
                     {% csrf_token %}

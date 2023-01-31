@@ -16,7 +16,7 @@
 
 <div class="box">
 	<h2>Testsolving sessions you are in</h2>
-	{% testsolve_session_list current_sessions request.user show_notes=True show_leave_button=True %}
+	{% testsolve_session_list current_user_sessions request.user show_notes=True show_leave_button=True %}
 	<footer class="card-footer">
 		<em>If you are an author or editor on a puzzle, you will not appear in the list or count of participants.</em>
 	</footer>
@@ -61,7 +61,7 @@
 						<div>({{ puzzle_data.warning }}!)</div>
 						{% endif %}
 					</td>
-					<td>{% if puzzle.is_spoiled %}{{ puzzle.html_link }}{% else %}{{ puzzle.html_display }}{% endif %}
+					<td>{{ puzzle.html_link }}
 					</td>
 					<td class="small-md">{{ puzzle.summary|markdown }}</td>
 					<td>{% user_list puzzle.authors %}</td>
@@ -83,6 +83,14 @@
 	<h2>Your past testsolving sessions</h2>
 	<a href="{% url 'testsolve_history' %}">View your past testsolves</a>
 </div>
+
+{% if is_testsolve_coordinator %}
+	<div class="box">
+		<h2>All active testsolves (Testsolving Coordinator only)</h2>
+		{% testsolve_session_list all_current_sessions request.user coordinator=True %}
+	</div>
+
+{% endif %}
 
 {% endblock %}
 

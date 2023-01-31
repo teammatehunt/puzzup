@@ -9,9 +9,10 @@ https://docs.djangoproject.com/en/2.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/2.2/ref/settings/
 """
-from pathlib import Path
 import datetime
+import json
 import os
+from pathlib import Path
 
 import dj_database_url
 
@@ -27,7 +28,7 @@ SECRET_KEY = os.environ.get("PUZZUP_SECRET", "secret-code-goes-here")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['']
+ALLOWED_HOSTS = [""]
 
 # Application definition
 
@@ -47,13 +48,14 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    'whitenoise.middleware.WhiteNoiseMiddleware',
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "puzzle_editing.middleware.TimezoneMiddleware",
 ]
 
 ROOT_URLCONF = "puzzup.urls"
@@ -80,16 +82,28 @@ WSGI_APPLICATION = "puzzup.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
-DATABASES = {'default': dj_database_url.config(default='postgres://localhost:5432/puzzup')}
+DATABASES = {
+    "default": dj_database_url.config(
+        default=os.environ.get("DATABASE_URL", "postgres://localhost:5432/puzzup")
+    )
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
-    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",},
-    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",},
-    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",},
-    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",},
+    {
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
+    },
+    {
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
+    },
+    {
+        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
+    },
+    {
+        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
+    },
 ]
 
 AUTH_USER_MODEL = "puzzle_editing.User"
@@ -119,22 +133,25 @@ LOGIN_URL = "/accounts/login"
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
 
-EMAIL_USE_TLS = True
-EMAIL_BACKEND = 'postmarker.django.EmailBackend'
-POSTMARK = {
-    'TOKEN': os.environ.get('POSTMARK_TOKEN'),
-    'TEST_MODE': False,
-    'VERBOSITY': 0,
-}
-EMAIL_SUBJECT_PREFIX = '[PuzzUp] '
 
-DEFAULT_FROM_EMAIL = 'bob@puzzup.lol'
+# FIXME: Update email settings
+EMAIL_USE_TLS = True
+EMAIL_HOST = "mail.mypuzzlehunt.com"
+EMAIL_HOST_USER = "noreply@puzzup.mypuzzlehunt.com"
+EMAIL_HOST_PASSWORD = "fixme"
+EMAIL_PORT = 587
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_SUBJECT_PREFIX = "[Puzzup] "
+
+DEFAULT_FROM_EMAIL = "noreply@puzzup.mypuzzlehunt.com"
+AUTOPOSTPROD_EMAIL = "puzzup@mypuzzlehunt.com"
 SERVER_EMAIL = DEFAULT_FROM_EMAIL
 
-TESTSOLVE_COORDINATOR_EMAIL = 'tc@puzzup.lol'
+# 1 year, in seconds
+SESSION_COOKIE_AGE = 365 * 24 * 60 * 60
 
 # Ensure logs directory exists.
-LOGS_DIR = BASE_DIR / 'logs'
+LOGS_DIR = BASE_DIR / "logs"
 os.makedirs(LOGS_DIR, exist_ok=True)
 
 LOGGING = {
@@ -148,51 +165,48 @@ LOGGING = {
         "django": {
             "level": "DEBUG",
             "class": "logging.FileHandler",
-            'filename': os.path.join(LOGS_DIR, 'django.log'),
+            "filename": os.path.join(LOGS_DIR, "django.log"),
             "formatter": "django",
         },
         "puzzle": {
             "level": "DEBUG",
             "class": "logging.FileHandler",
-            'filename': os.path.join(LOGS_DIR, 'puzzle.log'),
+            "filename": os.path.join(LOGS_DIR, "puzzle.log"),
             "formatter": "puzzles",
         },
         "request": {
             "level": "DEBUG",
             "class": "logging.FileHandler",
-            'filename': os.path.join(LOGS_DIR, 'request.log'),
+            "filename": os.path.join(LOGS_DIR, "request.log"),
             "formatter": "puzzles",
         },
         "console": {
             "level": "DEBUG",
             "class": "logging.StreamHandler",
             "formatter": "puzzles",
-        }
+        },
     },
     "loggers": {
-        "django": {"handlers": ["django"], "level": "DEBUG", "propagate": True,},
-        "puzzles.puzzle": {
+        "django": {
+            "handlers": ["django"],
+            "level": "DEBUG",
+            "propagate": True,
+        },
+        "puzzle_editing": {
             "handlers": ["puzzle"],
             "level": "DEBUG",
-            "propagate": False,
         },
-        "puzzles.request": {
-            "handlers": ["request"],
-            "level": "DEBUG",
-            "propagate": False,
-        },
-        "puzzle_editing.commands": {
-            "handlers": ["console", "django"],
-            "level": "DEBUG",
-        }
     },
 }
 
 # only if you want to do postprodding
-HUNT_REPO_URL = os.environ.get('HUNT_REPO_URL','')
-HUNT_REPO = os.environ.get('HUNT_REPO','')
-SSH_KEY = os.environ.get('SSH_KEY_PATH', '~/.ssh/id_rsa')
+HUNT_REPO_URL = os.environ.get("HUNT_REPO_URL", "")
+HUNT_REPO = os.environ.get("HUNT_REPO", "")
+HUNT_REPO_BRANCH = os.environ.get("HUNT_REPO_BRANCH", "main")
+HUNT_REPO_CLIENT = os.path.join(HUNT_REPO, "client")
+SSH_KEY = os.environ.get("SSH_KEY_PATH", "~/.ssh/id_rsa")
 
+# FIXME: Set hunt time
 HUNT_TIME = datetime.datetime(
     year=2023,
     month=1,
@@ -213,18 +227,30 @@ REST_FRAMEWORK = {
         "rest_framework.authentication.BasicAuthentication",
         "rest_framework.authentication.SessionAuthentication",
     ],
-    "DEFAULT_FILTER_BACKENDS": [
-        "django_filters.rest_framework.DjangoFilterBackend"
-    ]
+    "DEFAULT_FILTER_BACKENDS": ["django_filters.rest_framework.DjangoFilterBackend"],
 }
 
-# Discord integration
-DISCORD_GUILD_ID = os.environ.get('DISCORD_GUILD_ID')
-DISCORD_BOT_TOKEN = os.environ.get('DISCORD_BOT_TOKEN')
-DISCORD_APP_PUBLIC_KEY = os.environ.get('DISCORD_APP_PUBLIC_KEY')
-DISCORD_CLIENT_ID = os.environ.get('DISCORD_CLIENT_ID')
-DISCORD_CLIENT_SECRET = os.environ.get('DISCORD_CLIENT_SECRET')
-DISCORD_OAUTH_SCOPES = "identify"
+DRIVE_SETTINGS = {}
+credentials_file = BASE_DIR / "credentials/drive-credentials.json"
+if credentials_file.is_file():
+    with open(credentials_file, "rt") as f:
+        DRIVE_SETTINGS["credentials"] = json.load(f)
 
-POSTPROD_URL = os.environ.get('POSTPROD_URL', "")
-PROD_URL = os.environ.get('PROD_URL', "")
+# Discord integration
+DISCORD_GUILD_ID = os.environ.get("DISCORD_GUILD_ID")
+DISCORD_BOT_TOKEN = os.environ.get("DISCORD_BOT_TOKEN")
+DISCORD_APP_PUBLIC_KEY = os.environ.get("DISCORD_APP_PUBLIC_KEY")
+DISCORD_CLIENT_ID = os.environ.get("DISCORD_CLIENT_ID")
+DISCORD_CLIENT_SECRET = os.environ.get("DISCORD_CLIENT_SECRET")
+DISCORD_OAUTH_SCOPES = "identify"
+DISCORD_TESTSOLVE_CHANNEL_ID = os.environ.get("DISCORD_TESTSOLVE_CHANNEL_ID")
+TESTSOLVING_FOLDER_ID = os.environ.get("TESTSOLVING_FOLDER_ID")
+PUZZLE_DRAFT_FOLDER_ID = os.environ.get("PUZZLE_DRAFT_FOLDER_ID")
+FACTCHECKING_FOLDER_ID = os.environ.get("FACTCHECKING_FOLDER_ID")
+FACTCHECKING_TEMPLATE_ID = os.environ.get("FACTCHECKING_TEMPLATE_ID")
+
+POSTPROD_BRANCH_URL = os.environ.get("POSTPROD_BRANCH_URL", "")
+POSTPROD_FACTORY_URL = os.environ.get("POSTPROD_FACTORY_URL", "")
+POSTPROD_URL = os.environ.get("POSTPROD_URL", "")
+PROD_URL = os.environ.get("PROD_URL", "")
+PUZZUP_URL = os.environ.get("PUZZUP_URL", "")

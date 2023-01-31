@@ -15,7 +15,13 @@
 			<table class="table">
 			{% for option in round_group.list %}
 			<tr class="{% if option.instance.other_puzzle_count %}assigned-to-other{% endif %}">
-				<td width="50%" class="answer">{% include option.template_name with widget=option %}</td>
+				<td width="50%" class="answer">
+				{% if option.whitespace_sensitive %}
+					<pre>{% include option.template_name with widget=option %}</pre>
+				{% else %}
+					{% include option.template_name with widget=option %}
+				{% endif %}
+				</td>
 				<td width="20%">
 					{% with option.instance.other_puzzle_count as opc %}
 					{% if opc > 0 %}

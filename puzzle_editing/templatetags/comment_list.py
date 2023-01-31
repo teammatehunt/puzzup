@@ -17,7 +17,7 @@ def comment_list(
 ):
     comments = comments.order_by("date").select_related("author")
 
-    authors = set(puzzle.authors.values_list("id", flat=True))
+    authors = set(a.id for a in puzzle.authors.all())
 
     for comment in comments:
         comment.author.is_author = comment.author.id in authors

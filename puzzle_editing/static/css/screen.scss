@@ -78,16 +78,11 @@ select {
 	}
 }
 
-body.byround {
+body.byround, body.rounds {
 	table {
 		@extend %table;
 
 		font-size: .95rem !important;
-
-
-		.answer {
-			@extend %answer;
-		}
 
 		.authors, .editors {
 			font-size: .9em;
@@ -103,20 +98,10 @@ body.byround {
 	}
 }
 
-// ANSWER LIST
+// ANSWERS
 
-body.answers {
-	.answer {
-		@extend %answer;
-	}
-}
-
-// ANSWER SELECTOR
-
-body.assign-answers {
-	.answer {
-		@extend %answer;
-	}
+.answer {
+	@extend %answer;
 }
 
 // AWAITING EDITOR
@@ -347,6 +332,13 @@ table.puzzle-table {
 	}
 }
 
+.guess.partially_correct {
+  font-weight: bold;
+}
+.guess.partially_correct::before {
+  content: "❓";
+}
+
 .guess.incorrect::before {
 	content: "❌";
 }
@@ -372,12 +364,23 @@ table.puzzle-table {
 	display: none;
 }
 
+.hide-fact-assigned:checked ~ div table tr.factchecker {
+	display: none;
+}
+
 .hide-past-solution:checked ~ div table tr.past_needs_solution {
 	display: none;
 }
 
 .show-only-answer:checked ~ div table tr.puzzle-row:not(.answered) {
 	display: none;
+}
+
+.show-answer:not(:checked) ~ div table td.answer {
+  display: none;
+}
+.show-answer:checked ~ div table td.answer-hidden {
+  display: none;
 }
 
 .unvisited .puzzle-link {
@@ -399,16 +402,16 @@ table.puzzle-table {
 .hide-assigned:checked ~ div .assigned {
 	display: none;
 }
-.hide-assignments:checked ~ div > table .assignment-spoiler {
+.hide-assignments:checked ~ div table .assignment-spoiler {
 	display: none;
 }
-.hide-assignments:not(:checked) ~ div > table .assignment-unspoiler {
+.hide-assignments:not(:checked) ~ div table .assignment-unspoiler {
 	display: none;
 }
-.hide-delete-answer:checked ~ div > table .delete-answer-button {
+.hide-delete-answer:checked ~ div table .delete-answer-button {
 	display: none;
 }
-.hide-assignments:not(:checked) ~ div > table .assignment-unspoiler {
+.hide-assignments:not(:checked) ~ div table .assignment-unspoiler {
 	display: none;
 }
 .hide-test-authored:checked + label + input + label + div > table tr.test-authored {
@@ -427,7 +430,7 @@ table.puzzle-table {
 	color: var(--deemphasized-color);
 }
 
-.hide-assigned-to-other:checked + label + br + br + div table tr.assigned-to-other {
+.hide-assigned-to-other:checked ~ div table tr.assigned-to-other {
 	display: none;
 }
 
@@ -544,16 +547,16 @@ body.singleround {
 
 	textarea {
 		width: 100%;
-		height: 4rem;
+		height: 8rem;
 	}
 
-	.control {
-		ul {
+	.control:not(.markdown-preview) {
+		& > ul {
 			margin: 0;
-		}
 
-		li {
-			list-style-type: none;
+			li {
+				list-style-type: none;
+			}
 		}
 	}
 }

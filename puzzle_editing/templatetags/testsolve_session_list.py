@@ -3,16 +3,21 @@ from django.db.models import Exists
 from django.db.models import OuterRef
 from django.db.models import Subquery
 
-from puzzle_editing.models import User
-from puzzle_editing.models import TestsolveParticipation
 from puzzle_editing.models import get_user_role
+from puzzle_editing.models import TestsolveParticipation
+from puzzle_editing.models import User
 
 register = template.Library()
 
 
 @register.inclusion_tag("tags/testsolve_session_list.html")
 def testsolve_session_list(
-    sessions, user, show_notes=False, show_leave_button=False, show_ratings=False
+    sessions,
+    user,
+    show_notes=False,
+    show_leave_button=False,
+    show_ratings=False,
+    coordinator=False,
 ):
 
     sessions = (
@@ -30,6 +35,13 @@ def testsolve_session_list(
         )
         .order_by("puzzle__priority")
         .select_related("puzzle")
+        .prefetch_related("participations__user")
+        .prefetch_related("puzzle__spoiled")
+        .prefetch_related("puzzle__authors")
+        .prefetch_related("puzzle__editors")
+        .prefetch_related("puzzle__postprodders")
+        .prefetch_related("puzzle__factcheckers")
+        .prefetch_related("puzzle__tags")
     )
 
     if show_ratings:
@@ -52,20 +64,32 @@ def testsolve_session_list(
 
     id_to_index = {session.id: i for i, session in enumerate(sessions)}
 
-    for testsolve in TestsolveParticipation.objects.filter(
-        session__in=[session.id for session in sessions]
-    ):
-        if get_user_role(testsolve.user, testsolve.session.puzzle) in [None, "postprodder", "factchecker"]:
-            sessions[id_to_index[testsolve.session.id]].opt_participants.append(
+    for testsolve in sorted(set().union(*(session.participations.all() for session in sessions)), key=lambda p:p.pk):
+        session = sessions[id_to_index[testsolve.session_id]]
+        if get_user_role(testsolve.user, session.puzzle) in [
+            None,
+            "postprodder",
+            "factchecker",
+        ]:
+            session.opt_participants.append(
                 (testsolve.user.username, testsolve.user.credits_name)
             )
 
     for session in sessions:
-        session.participants_html = str(len(session.opt_participants)) + (" participant: " if len(session.opt_participants) == 1 else " participants: ") + ", ".join([u[1] if u[1] else u[0] for u in session.opt_participants])
+        session.participants_html = (
+            str(len(session.opt_participants))
+            + (
+                " participant: "
+                if len(session.opt_participants) == 1
+                else " participants: "
+            )
+            + ", ".join([u[1] if u[1] else u[0] for u in session.opt_participants])
+        )
 
     return {
         "sessions": sessions,
         "show_notes": show_notes,
         "show_leave": show_leave_button,
         "show_ratings": show_ratings,
+        "coordinator": coordinator,
     }

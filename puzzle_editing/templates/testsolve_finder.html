@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% load markdown %}
 {% load user_list %}
+{% load name_list %}
 {% load humanize %}
 
 {% block title %}Testsolve Finder{% endblock %}
@@ -25,7 +26,7 @@
 		<th>Priority</th>
 		<th>When Entered Testsolving</th>
 		{% for user in users %}
-		<th>{{ user.credits_name }}</th>
+		<th>{{ user|display_name }}</th>
 		{% endfor %}
 	</tr>
 	{% for puzzle in puzzles %}

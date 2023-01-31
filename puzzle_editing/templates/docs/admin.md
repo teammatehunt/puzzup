@@ -36,6 +36,6 @@ Finally, there are a few "Site settings" that just look at the values associated
 
 ## Postprodding
 
-This note was in the User doc:
+PuzzUp allows you to export puzzle and hint metadata in the form of JSON or YAML files that can then be imported into your hunt repo.
 
-PuzzUp allows you to upload a zip file and automatically push it to a Git repository, if you set that up. I'm not sure how it works, sorry.
+We've also added the ability to automatically generate a React file based on a template. This hooks into the tph-template repo and automatically makes a commit in a new branch. To do so, you will need to set up the `HUNT_REPO` and `HUNT_REPO_URL` env variables to point to your local and remote Git repos, respectively.

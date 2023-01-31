@@ -3,7 +3,7 @@ from datetime import datetime
 from typing import NamedTuple
 
 import django.urls as urls
-from django.contrib.auth.models import Permission
+from django.contrib.auth.models import Group, Permission
 from django.contrib.contenttypes.models import ContentType
 from django.test import Client
 from django.test import TestCase
@@ -38,13 +38,20 @@ class Misc(TestCase):
         self.c = User.objects.create_user(
             username="c", email="c@example.com", password="password"
         )
+        self.eic = User.objects.create_user(
+            username="eic", email="eic@example.com", password="super-secret"
+        )
 
         # editor
         permission = Permission.objects.get(
             content_type=ContentType.objects.get_for_model(Round),
             codename="change_round",
         )
+        self.eic_group = Group.objects.create(name='EIC')
+        self.eic_group.permissions.add(permission)
+
         self.a.user_permissions.add(permission)
+        self.eic.groups.add(self.eic_group)
 
         self.puzzle1 = Puzzle(
             name="Spoilery Title",
@@ -210,7 +217,10 @@ class Misc(TestCase):
         bc = Client()
         bc.login(username="b", password="password")
 
-        clients = dict(a=ac, b=bc)
+        eicc = Client()
+        eicc.login(username="eic", password="super-secret")
+
+        clients = dict(a=ac, b=bc, eic=eicc)
 
         class TestData(NamedTuple):
             endpoint: str
@@ -220,7 +230,7 @@ class Misc(TestCase):
         cases = [
             TestData("postprod", ["a", "b"], []),
             TestData("needs_editor", ["a", "b"], []),
-            TestData("awaiting_editor", ["a", "b"], []),
+            TestData("awaiting_editor", ["eic"], ["a", "b"]),
             TestData("factcheck", ["a", "b"], []),
             TestData("users", ["a", "b"], []),
             TestData("users_statuses", ["a", "b"], []),
@@ -235,16 +245,17 @@ class Misc(TestCase):
             for username in case.allowed:
                 client = clients[username]
                 self.assertEqual(
-                    client.get(url).status_code, 200,
-                    f'User {username} should have access to {case.endpoint}'
+                    client.get(url, follow=True).status_code,
+                    200,
+                    f"User {username} should have access to {case.endpoint}",
                 )
             for username in case.banned:
                 client = clients[username]
                 self.assertEqual(
-                    client.get(url).status_code, 403,
-                    f'User {username} should not have access to {case.endpoint}'
+                    client.get(url, follow=True).status_code,
+                    403,
+                    f"User {username} should not have access to {case.endpoint}",
                 )
-
 
         self.assertEqual(
             ac.get(urls.reverse("rounds")).status_code,

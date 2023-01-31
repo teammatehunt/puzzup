@@ -1,14 +1,15 @@
 import time
 import typing as t
 
-KT = t.TypeVar('KT')
-VT = t.TypeVar('VT')
+KT = t.TypeVar("KT")
+VT = t.TypeVar("VT")
 
 Seconds = int
 
 
 class TimedCache(t.Generic[KT, VT]):
-    '''Simple cache where entries expire after some amount of time.'''
+    """Simple cache where entries expire after some amount of time."""
+
     timeout: Seconds
     _cache: dict[KT, tuple[VT, float]]  # pytype: disable=not-supported-yet
 

@@ -1,14 +1,16 @@
-from itertools import chain
-from enum import Flag
 import typing as t
-from pydantic import BaseModel, Field
+from enum import Flag
+from itertools import chain
+
+from pydantic import BaseModel
+from pydantic import Field
 
 # A PermLike is anything we can convert into a Permission.
-PermLike = t.Union['Permission', str, int, None]
+PermLike = t.Union["Permission", str, int, None]
 
 
 class Permission(Flag):
-    '''Represents a discord permission.
+    """Represents a discord permission.
 
     Use .of to coerce any PermLike to a Permission:
 
@@ -35,7 +37,8 @@ class Permission(Flag):
     <Permission.ADMINISTRATOR|KICK_MEMBERS|CREATE_INSTANT_INVITE: 11>
     >>> (Permission.KICK_MEMBERS | Permission.BAN_MEMBERS) in Permission(1023)
     True
-    '''
+    """
+
     NO_PERMISSION = 0
     CREATE_INSTANT_INVITE = 0x00000001
     KICK_MEMBERS = 0x00000002
@@ -77,14 +80,13 @@ class Permission(Flag):
     SEND_MESSAGES_IN_THREADS = 0x4000000000
     START_EMBEDDED_ACTIVITIES = 0x8000000000
 
-
     @classmethod
     def __get_validators__(cls):
         yield cls.of
 
     @classmethod
-    def of(cls, obj: PermLike) -> 'Permission':
-        '''Coerce an object to a permission.'''
+    def of(cls, obj: PermLike) -> "Permission":
+        """Coerce an object to a permission."""
         if obj is None:
             return Permission(0)
         if isinstance(obj, str):
@@ -96,7 +98,7 @@ class Permission(Flag):
 
 
 class Overwrite(BaseModel):
-    '''A Discord permission overwrite.
+    """A Discord permission overwrite.
 
     It's a pydantic model, so it has a lot of smart helpers, e.g.:
 
@@ -106,7 +108,8 @@ class Overwrite(BaseModel):
     'User foo can SPEAK|STREAM; cannot BAN_MEMBERS.'
     >>> o1.dict()
     {'id': 'foo', 'type': 1, 'allow': '2097664', 'deny': '4'}
-    '''
+    """
+
     id: str
     type: int
     allow: Permission = Permission.NO_PERMISSION
@@ -116,45 +119,43 @@ class Overwrite(BaseModel):
         frozen = True
 
     def is_empty(self):
-        '''True if our permissions are empty.'''
+        """True if our permissions are empty."""
         return not self.allow and not self.deny
 
     def __nonzero__(self):
         return self.is_empty()
 
     def describe(self) -> str:
-        label = f'User {self.id}' if self.type else f'Role {self.id}'
+        label = f"User {self.id}" if self.type else f"Role {self.id}"
         astr = str(self.allow)[11:]  # strip leading Permission.
         dstr = str(self.deny)[11:]  # strip leading Permission.
         if not self.allow and not self.deny:
-            return f'{label} has no overwrites.'
+            return f"{label} has no overwrites."
         if not self.deny:
-            return f'{label} can {astr}.'
+            return f"{label} can {astr}."
         if not self.allow:
-            return f'{label} cannot {dstr}.'
-        return f'{label} can {astr}; cannot {dstr}.'
+            return f"{label} cannot {dstr}."
+        return f"{label} can {astr}; cannot {dstr}."
 
     def dict(self, *a, **kw):
-        '''Like pydantic's dict, but allow and deny become strings.
+        """Like pydantic's dict, but allow and deny become strings.
 
         This is necessary for discord.
 
         >>> o1 = Overwrite(id="foo", type=1, allow=3, deny=4)
         >>> o1.dict()
         {'id': 'foo', 'type': 1, 'allow': '3', 'deny': '4'}
-        '''
+        """
         d = super().dict(*a, **kw)
-        for k in ['allow', 'deny']:
+        for k in ["allow", "deny"]:
             if k in d:
                 d[k] = str(d[k].value)
         return d
 
     def update(
-            self,
-            allow: PermLike = None,
-            deny: PermLike = None,
-            ignore: PermLike = None) -> 'Overwrite':
-        '''Return an identical Overwrite but with permissions changed.
+        self, allow: PermLike = None, deny: PermLike = None, ignore: PermLike = None
+    ) -> "Overwrite":
+        """Return an identical Overwrite but with permissions changed.
 
         Bits in allow will be enabled in self.allow and disabled in self.deny.
         Bits in deny will be enabled in self.deny and disabled in self.allow.
@@ -176,13 +177,14 @@ class Overwrite(BaseModel):
         Traceback (most recent call last):
             ...
         ValueError: Contradiction: allow Permission.STREAM, deny Permission.NO_PERMISSION, ignore Permission.STREAM
-        '''
+        """
         allow = Permission.of(allow)
         deny = Permission.of(deny)
         ignore = Permission.of(ignore)
         if allow & deny or allow & ignore or deny & ignore:
             raise ValueError(
-                f"Contradiction: allow {allow}, deny {deny}, ignore {ignore}")
+                f"Contradiction: allow {allow}, deny {deny}, ignore {ignore}"
+            )
         return Overwrite(
             id=self.id,
             type=self.type,
@@ -192,7 +194,7 @@ class Overwrite(BaseModel):
 
 
 class Overwrites(BaseModel):
-    '''Models a set of user and role overwrites.
+    """Models a set of user and role overwrites.
 
     It can parse the overwrite lists exposed by discord's API:
     >>> o = Overwrites.from_discord([
@@ -235,7 +237,8 @@ class Overwrites(BaseModel):
     >>> o.set(o.get_role('new').update(ignore="CREATE_INSTANT_INVITE"))
     >>> 'new' in o.roles
     False
-    '''
+    """
+
     users: dict[str, Overwrite] = Field(default_factory=dict)
     roles: dict[str, Overwrite] = Field(default_factory=dict)
 
@@ -258,8 +261,7 @@ class Overwrites(BaseModel):
         yield from self.all_overwrites()
 
     def to_discord(self, *a, **kw) -> list[dict]:
-        return [o.dict(*a, **kw) for o in self.all_overwrites()
-                if not o.is_empty()]
+        return [o.dict(*a, **kw) for o in self.all_overwrites() if not o.is_empty()]
 
     def dict(self, *a, **kw):
         return self.to_discord(*a, **kw)
@@ -268,13 +270,13 @@ class Overwrites(BaseModel):
         return self.from_discord(obj)
 
     def get_user(self, uid):
-        '''Get a user's overwrite, or a default one if none exists'''
+        """Get a user's overwrite, or a default one if none exists"""
         if uid in self.roles:
             raise ValueError(f"Id {uid} is a role, not a user.")
         return self.users.get(uid, Overwrite(id=uid, type=1))
 
     def get_role(self, rid):
-        '''Get a role's overwrite, or a default one if none exists'''
+        """Get a role's overwrite, or a default one if none exists"""
         if rid in self.users:
             raise ValueError(f"Id {rid} is a user, not a role.")
         return self.roles.get(rid, Overwrite(id=rid, type=0))
@@ -294,9 +296,9 @@ class Overwrites(BaseModel):
             main = self.users
         if overwrite.id in other:
             if other is self.users:
-                want, got = 'role', 'user'
+                want, got = "role", "user"
             else:
-                want, got = 'user', 'role'
+                want, got = "user", "role"
             raise ValueError(f"Id {overwrite.id} is a {got}, not a {want}.")
         if overwrite.is_empty():
             if overwrite.id in main:
@@ -305,12 +307,13 @@ class Overwrites(BaseModel):
             main[overwrite.id] = overwrite
 
     def update_user(
-            self,
-            uid: str,
-            allow: PermLike = None,
-            deny: PermLike = None,
-            ignore: PermLike = None):
-        '''
+        self,
+        uid: str,
+        allow: PermLike = None,
+        deny: PermLike = None,
+        ignore: PermLike = None,
+    ):
+        """
         >>> os = Overwrites()
         >>> os.update_user("foo", allow=Permission.VIEW_CHANNEL)
         >>> os.get_user("foo").describe()
@@ -321,13 +324,14 @@ class Overwrites(BaseModel):
         >>> os.update_user("foo", allow=Permission.SPEAK)
         >>> os.get_user("foo").describe()
         'User foo can SPEAK; cannot VIEW_CHANNEL.'
-        '''
+        """
         self.set(self.get_user(uid).update(allow, deny, ignore))
 
     def update_role(
-            self,
-            uid: str,
-            allow: PermLike = None,
-            deny: PermLike = None,
-            ignore: PermLike = None):
+        self,
+        uid: str,
+        allow: PermLike = None,
+        deny: PermLike = None,
+        ignore: PermLike = None,
+    ):
         self.set(self.get_role(uid).update(allow, deny, ignore))

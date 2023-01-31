@@ -6,10 +6,7 @@ register = template.Library()
 
 
 @register.simple_tag
-def avatar_list(users, linkify=False, skip_optimize=False):
+def avatar_list(users, linkify=False):
     """Displays a QuerySet of users"""
 
-    if not skip_optimize:
-        users = users.only("avatar_url", "username", "display_name")
-
-    return User.html_avatar_list_of(users, linkify)
+    return User.html_avatar_list_of(users.all(), linkify)

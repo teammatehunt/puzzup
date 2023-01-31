@@ -28,7 +28,19 @@
             <tr class="is-selected">
                 <th>Actively Editing</th>
                 {% for ed in actively_editing %}
-                    <th>{{ ed|last }}</th>
+                    <th>{{ ed.1.active }}</th>
+                {% endfor %}
+            </tr>
+            <tr>
+                <th>With Drafts</th>
+                {% for ed in actively_editing %}
+                    <th>{{ ed.1.with_drafts }}</th>
+                {% endfor %}
+            </tr>
+            <tr>
+                <th>Testsolved</th>
+                {% for ed in actively_editing %}
+                    <th>{{ ed.1.testsolved }}</th>
                 {% endfor %}
             </tr>
         </thead>

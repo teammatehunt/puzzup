@@ -1,6 +1,8 @@
-from rest_framework import serializers, fields
+from rest_framework import fields
+from rest_framework import serializers
 
-from puzzle_editing.models import Puzzle, User
+from puzzle_editing.models import Puzzle
+from puzzle_editing.models import User
 
 
 class PuzzleSerializer(serializers.HyperlinkedModelSerializer):
@@ -29,7 +31,7 @@ class PuzzleSerializer(serializers.HyperlinkedModelSerializer):
             "priority",
             "content",
             "solution",
-            "status_mtime"
+            "status_mtime",
         ]
 
 

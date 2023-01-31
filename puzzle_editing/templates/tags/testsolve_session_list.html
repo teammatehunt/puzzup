@@ -6,9 +6,18 @@
 	<tr align="left">
 		<th>Session</th>
 		<th>Puzzle</th>
-		<th>Summary</th>
-		<th>Priority</th>
+		{% if coordinator %}
+			<th>Authors</th>
+			<th>Editors</th>
+			<th>Status</th>
+		{% else %}
+			<th>Summary</th>
+			<th>Priority</th>
+		{% endif %}
 		<th>Participants</th>
+		{% if coordinator %}
+			<th>Completions</th>
+		{% endif %}
 		{% if show_notes %}
 			<th>Notes</th>
 		{% endif %}
@@ -25,9 +34,18 @@
 		<tr>
 			<td sorttable_customkey="{{ session.id }}"><a href="{% url 'testsolve_one' session.id %}">Session {{ session.id }}</a>{% if session.is_author %}<div>(you are an author)</div>{% elif session.is_spoiled %}<div>(you are spoiled)</div>{% endif %}</td>
 			<td sorttable_customkey="{{ puzzle.id }}">{% if session.is_spoiled %}{{ puzzle.html_link }}{% else %}{{ puzzle.html_display }}{% endif %}</td>
-			<td class="small-md">{{ puzzle.summary|markdown }}</td>
-			<td sorttable_customkey="{{ puzzle.priority }}">{{ puzzle.get_priority_display }}</td>
+			{% if coordinator %}
+				<td>{% user_list puzzle.authors linkify=True %}</td>
+				<td>{% user_list puzzle.editors linkify=True %}</td>
+				<td>{{ puzzle.get_status_emoji }} {{ puzzle.get_status_display }}</td>
+			{% else %}
+				<td class="small-md">{{ puzzle.summary|markdown }}</td>
+				<td sorttable_customkey="{{ puzzle.priority }}">{{ puzzle.get_priority_display }}</td>
+			{% endif %}
 			<td>{{ session.participants_html }}</td>
+			{% if coordinator %}
+				<td>{{ session.get_done_participants_display }}</td>
+			{% endif %}
 			{% if show_notes %}
 				<td class="small-md">{{ session.notes|markdown }}</td>
 			{% endif %}

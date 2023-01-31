@@ -18,6 +18,9 @@
                     <span class="tag">{{ sup.obj.get_status_display }}</span>
                 </p>
                 <p>
+                    <b>Assignees</b>: {% user_list sup.obj.assignees linkify=True %}
+                </p>
+                <p>
                     <b>Author notes</b><br>
                     {{ .obj.author_notes|default_if_none:"(none)"|markdown }}
                 </p>

@@ -3,11 +3,14 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from import_export import resources
 from import_export.admin import ImportExportModelAdmin
 
+from .models import Act
 from .models import CommentReaction
 from .models import Hint
+from .models import PseudoAnswer
 from .models import Puzzle
 from .models import PuzzleAnswer
 from .models import PuzzleComment
+from .models import PuzzleFactcheck
 from .models import PuzzlePostprod
 from .models import PuzzleTag
 from .models import PuzzleVisited
@@ -21,31 +24,40 @@ from .models import User
 
 
 class UserAdmin(BaseUserAdmin):
-    '''Extends default UserAdmin with our new fields.'''
-    list_display = ('username', 'email', 'display_name', 'discord_username',
-                    'hat')
+    """Extends default UserAdmin with our new fields."""
+
+    list_display = ("username", "email", "display_name", "discord_username", "hat")
 
     fieldsets = BaseUserAdmin.fieldsets + (
-        (None, {'fields': (
-            'display_name',
-            'discord_username',
-            'discord_nickname',
-            'discord_user_id',
-            'avatar_url',
-            'credits_name',
-            'bio',
-            'enable_keyboard_shortcuts',
-        )}),
+        (
+            None,
+            {
+                "fields": (
+                    "display_name",
+                    "discord_username",
+                    "discord_nickname",
+                    "discord_user_id",
+                    "avatar_url",
+                    "credits_name",
+                    "bio",
+                )
+            },
+        ),
     )
+
 
 class TestsolveParticipationAdmin(ImportExportModelAdmin):
     model = TestsolveParticipation
 
+
 admin.site.register(User, UserAdmin)
+admin.site.register(Act)
 admin.site.register(Round)
-admin.site.register(PuzzleAnswer)
+admin.site.register(PseudoAnswer)
 admin.site.register(Puzzle)
+admin.site.register(PuzzleAnswer)
 admin.site.register(PuzzleTag)
+admin.site.register(PuzzleFactcheck)
 admin.site.register(PuzzlePostprod)
 admin.site.register(PuzzleVisited)
 admin.site.register(StatusSubscription)

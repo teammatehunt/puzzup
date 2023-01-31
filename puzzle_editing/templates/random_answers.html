@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load answer %}
 {% load puzzle_list %}
 {% load markdown %}
 
@@ -18,16 +19,16 @@
             <div class='table-container'>
             <table>
                 <thead>
-                    <td>Round</td><td>Answer (hover to reveal)</td><td>Notes</td>
+                    <td>Act</td><td>Round</td><td>Answer (hover to reveal)</td><td>Notes</td>
                 </thead>
                 {% for answer in answers %}
-                <tr class="answerspoiler"><th>{{answer.round}}</th><td>{{answer}}</td><td>{{answer.notes}}</td></tr>
+                <tr class="answerspoiler"><th>{{answer.round.act}}</th><th>{{answer.round}}</th><td>{% formatted_answer answer %}</td><td>{{answer.notes}}</td></tr>
                 {% endfor %}
             </table>
             </div>
             <p>
                 <strong>To claim an answer:</strong>
-                Make a new puzzle, and mention in the notes which answer you'd like. Then click "Ready for an editor". An editor-in-chief will claim an answer for you and assign it to your new puzzle.
+                Make a new puzzle, and mention in the notes which answer you'd like. Then click "Ready for an editor". An editor will claim an answer for you and assign it to your new puzzle.
             </p>
         </div>
     </div>
@@ -35,16 +36,21 @@
 
 
 <style>
-    .answerspoiler {
+    .answerspoiler,
+    .answerspoiler code,
+    .answerspoiler pre {
         color: black;
         background-color: black;
         padding: 3px;
     }
-    .answerspoiler:hover, .unhide:checked + label + div > table .answerspoiler  {
+    .answerspoiler:hover code,
+    .answerspoiler:hover pre,
+    .unhide:checked + label + div > table .answerspoiler code,
+    .unhide:checked + label + div > table .answerspoiler pre {
         color:white;
         background-color: #333;
     }
-    .answerspoiler > th{
+    .answerspoiler > th {
         color:white;
         background-color: #f8f8cc;
     }

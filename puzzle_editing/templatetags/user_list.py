@@ -6,10 +6,11 @@ register = template.Library()
 
 
 @register.simple_tag
-def user_list(users, linkify=False, skip_optimize=False):
+def user_list(users, linkify=False):
     """Displays a QuerySet of users"""
 
-    if not skip_optimize:
-        users = users.only("username", "display_name")
-
+    try:
+        iter(users)
+    except TypeError:
+        users = users.all()
     return User.html_user_list_of(users, linkify)
